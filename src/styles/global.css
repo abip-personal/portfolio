@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter';
 
 /*
  * Class-based dark mode: the inline script in BaseLayout stamps `data-theme`
@@ -11,55 +12,228 @@
  * NAMES are a contract that components depend on, so renaming one is a
  * breaking change. Semantic tokens (surface/ink/accent) are defined below as
  * plain CSS variables so they can be swapped per theme.
+ *
+ * Visual direction: BOLD & EXPRESSIVE, recruiter-first. Boldness lives in
+ * type scale, colour and one signature graphic device (the "signal rule"),
+ * never in hiding information behind interaction.
  */
 @theme {
   --font-sans:
     'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
 
-  /* Brand ramp, seeded from the CV accent #123A5E. */
-  --color-brand-50: #eef4fb;
-  --color-brand-100: #d6e4f4;
-  --color-brand-200: #adc9e8;
-  --color-brand-300: #7ba7d7;
-  --color-brand-400: #4a81c0;
-  --color-brand-500: #2b60a0;
-  --color-brand-600: #1d4a80;
+  /* ---------------------------------------------------------------
+   * Brand ramp — a brighter, more saturated evolution of the CV's
+   * #123A5E. The original stays as brand-700 so print and web agree.
+   * --------------------------------------------------------------- */
+  --color-brand-50: #eff5ff;
+  --color-brand-100: #dbe8fe;
+  --color-brand-200: #bfd7fe;
+  --color-brand-300: #7faeff;
+  --color-brand-400: #4a88f5;
+  --color-brand-500: #2568d6;
+  --color-brand-600: #1650ae;
   --color-brand-700: #123a5e;
-  --color-brand-800: #0d2b46;
-  --color-brand-900: #081c2e;
+  --color-brand-800: #0c2a45;
+  --color-brand-900: #071a2c;
+  --color-brand-950: #04101b;
 
-  /* Motion. Every use must be gated behind prefers-reduced-motion. */
+  /* Secondary "signal" accent — the cyan end of the brand blue. Used for
+   * the expressive moments: gradients, rules, numerals. */
+  --color-signal-200: #a5f3fc;
+  --color-signal-300: #67e8f9;
+  --color-signal-400: #22d3ee;
+  --color-signal-500: #06b6d4;
+  --color-signal-600: #0891b2;
+  --color-signal-700: #0e7490;
+  --color-signal-800: #155e75;
+  --color-signal-900: #164e63;
+
+  /* ---------------------------------------------------------------
+   * Type scale. Fluid where scale actually earns it (headings and the
+   * hero display); fixed at the small end so body copy stays stable.
+   * --------------------------------------------------------------- */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1.4;
+  --text-2xs--letter-spacing: 0.06em;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-xs--letter-spacing: 0.04em;
+
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.6;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.65;
+
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.6;
+
+  --text-xl: clamp(1.1875rem, 1.13rem + 0.3vw, 1.375rem);
+  --text-xl--line-height: 1.5;
+
+  --text-2xl: clamp(1.375rem, 1.27rem + 0.53vw, 1.75rem);
+  --text-2xl--line-height: 1.35;
+  --text-2xl--letter-spacing: -0.012em;
+
+  --text-3xl: clamp(1.75rem, 1.57rem + 0.9vw, 2.375rem);
+  --text-3xl--line-height: 1.22;
+  --text-3xl--letter-spacing: -0.02em;
+
+  --text-4xl: clamp(2.125rem, 1.8rem + 1.6vw, 3.25rem);
+  --text-4xl--line-height: 1.12;
+  --text-4xl--letter-spacing: -0.028em;
+
+  --text-5xl: clamp(2.5rem, 1.9rem + 3vw, 4.5rem);
+  --text-5xl--line-height: 1.04;
+  --text-5xl--letter-spacing: -0.034em;
+
+  /* The hero. Deliberately enormous on wide screens, still safe at 360px. */
+  --text-display: clamp(2.75rem, 1.35rem + 6.2vw, 6.5rem);
+  --text-display--line-height: 0.96;
+  --text-display--letter-spacing: -0.04em;
+
+  /* Metrics band numerals. */
+  --text-stat: clamp(2.25rem, 1.5rem + 3.4vw, 4rem);
+  --text-stat--line-height: 0.95;
+  --text-stat--letter-spacing: -0.038em;
+
+  --text-stat-sm: clamp(1.75rem, 1.35rem + 1.8vw, 2.75rem);
+  --text-stat-sm--line-height: 1;
+  --text-stat-sm--letter-spacing: -0.03em;
+
+  /* ---------------------------------------------------------------
+   * Radii
+   * --------------------------------------------------------------- */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.375rem;
+  --radius-3xl: 1.875rem;
+
+  /* ---------------------------------------------------------------
+   * Layout
+   * --------------------------------------------------------------- */
+  --container-prose: 44rem;
+  --container-content: 68rem;
+  --container-wide: 82rem;
+
+  /* ---------------------------------------------------------------
+   * Motion. Every use must be gated behind prefers-reduced-motion.
+   * --------------------------------------------------------------- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --duration-fast: 150ms;
   --duration-base: 300ms;
   --duration-slow: 600ms;
+
+  --animate-signal-draw: signal-draw var(--duration-slow) var(--ease-out-expo) both;
+
+  @keyframes signal-draw {
+    from {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+  }
 }
 
-/* Semantic tokens — light theme is the base. */
+/* ===================================================================
+ * Semantic tokens — light theme is the base.
+ * Contrast ratios (WCAG 2.1, computed not eyeballed):
+ *   ink       #08131F on #FFFFFF  18.70:1   on raised 17.62:1
+ *   ink-muted #41536B on #FFFFFF   7.85:1   on sunken  6.82:1
+ *   ink-subtle#5A6B82 on #FFFFFF   5.44:1   on sunken  4.74:1
+ *   accent    #0E4C8F on #FFFFFF   8.57:1   accent-ink #FFF on accent 8.57:1
+ *   signal    #0E7490 on #FFFFFF   5.36:1
+ *   border    #78899F on #FFFFFF   3.57:1   on sunken  3.11:1  (UI 3:1)
+ * =================================================================== */
 :root {
   --surface: #ffffff;
-  --surface-raised: #f6f8fa;
-  --surface-sunken: #eef1f5;
-  --ink: #0d1520;
-  --ink-muted: #4d5a6b;
-  --ink-subtle: #6b7785;
-  --border: #d8dce0;
-  --accent: var(--color-brand-700);
+  --surface-raised: #f5f8fc;
+  --surface-sunken: #e9f0f9;
+  --ink: #08131f;
+  --ink-muted: #41536b;
+  --ink-subtle: #5a6b82;
+  --border: #78899f;
+  --accent: #0e4c8f;
   --accent-ink: #ffffff;
+
+  /* Additions (new names, nothing renamed). */
+  --accent-strong: #123a5e;
+  --accent-soft: #dbe8fe;
+  --accent-soft-ink: #123a5e;
+  --signal: #0e7490;
+  --signal-ink: #ffffff;
+  --signal-soft: #cff4fb;
+  --signal-vivid: #06b6d4;
+  --border-subtle: #dde5ef;
+  --border-strong: #55677f;
+  --overlay-tint: rgb(14 76 143 / 0.06);
+  --code-bg: #eef3fa;
+
+  /* Signature gradients.
+   *   graphic — non-text fills only (rules, spines, bullets). Free to use the
+   *             vivid cyan because nothing is ever read on top of it.
+   *   text    — background-clip:text. Every stop passes 4.5:1 on the surface.
+   *   cta     — primary button fill. Every stop passes 4.5:1 against
+   *             --accent-ink, at any background-position along the sweep. */
+  --gradient-graphic: linear-gradient(100deg, #123a5e 0%, #0e4c8f 42%, #06b6d4 100%);
+  --gradient-text: linear-gradient(100deg, #123a5e 0%, #0e4c8f 30%, #0e7490 92%);
+  --gradient-cta: linear-gradient(100deg, #123a5e 0%, #0e4c8f 45%, #0e7490 100%);
+
+  --shadow-raise: 0 1px 2px rgb(8 19 31 / 0.06), 0 8px 24px -12px rgb(8 19 31 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(8 19 31 / 0.06), 0 18px 40px -18px rgb(8 19 31 / 0.28);
+
   color-scheme: light;
 }
 
+/* ===================================================================
+ * Dark theme.
+ *   ink       #EAF1FA on #070C14  17.23:1   on raised 15.64:1
+ *   ink-muted #A2B3C9 on #070C14   9.17:1   on raised  8.34:1
+ *   ink-subtle#8194AC on #070C14   6.31:1   on raised  5.74:1
+ *   accent    #7FAEFF on #070C14   8.77:1   on raised  7.97:1
+ *   accent-ink#071A2C on #7FAEFF   7.88:1
+ *   signal    #22D3EE on #070C14  10.84:1   on raised  9.85:1
+ *   border    #5D7595 on #070C14   4.15:1   on raised  3.77:1  (UI 3:1)
+ * =================================================================== */
 :root[data-theme='dark'] {
-  --surface: #0a0f16;
-  --surface-raised: #121a24;
-  --surface-sunken: #060a0f;
-  --ink: #eef2f7;
-  --ink-muted: #a8b4c2;
-  --ink-subtle: #7d8b9b;
-  --border: #223041;
-  --accent: var(--color-brand-300);
-  --accent-ink: #081c2e;
+  --surface: #070c14;
+  --surface-raised: #0f1826;
+  --surface-sunken: #04080e;
+  --ink: #eaf1fa;
+  --ink-muted: #a2b3c9;
+  --ink-subtle: #8194ac;
+  --border: #5d7595;
+  --accent: #7faeff;
+  --accent-ink: #071a2c;
+
+  --accent-strong: #bfd7fe;
+  --accent-soft: #14243a;
+  --accent-soft-ink: #bfd7fe;
+  --signal: #22d3ee;
+  --signal-ink: #04121a;
+  --signal-soft: #0b2b35;
+  --signal-vivid: #67e8f9;
+  --border-subtle: #1d2b3d;
+  --border-strong: #7b93b3;
+  --overlay-tint: rgb(127 174 255 / 0.08);
+  --code-bg: #101c2c;
+
+  --gradient-graphic: linear-gradient(100deg, #2568d6 0%, #7faeff 45%, #67e8f9 100%);
+  --gradient-text: linear-gradient(100deg, #bfd7fe 0%, #7faeff 45%, #67e8f9 100%);
+  --gradient-cta: linear-gradient(100deg, #7faeff 0%, #a5c8ff 45%, #67e8f9 100%);
+
+  --shadow-raise: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px -12px rgb(0 0 0 / 0.7);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.5), 0 18px 40px -18px rgb(0 0 0 / 0.85);
+
   color-scheme: dark;
 }
 
@@ -74,6 +248,20 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-ink: var(--accent-soft-ink);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-soft: var(--signal-soft);
+  --color-signal-vivid: var(--signal-vivid);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-code-bg: var(--code-bg);
+
+  --shadow-raise: var(--shadow-raise);
+  --shadow-lift: var(--shadow-lift);
 }
 
 @layer base {
@@ -81,13 +269,18 @@
     scroll-behavior: smooth;
     /* Offset anchor targets so the sticky header never covers a heading. */
     scroll-padding-top: 5rem;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     background-color: var(--surface);
     color: var(--ink);
     font-family: var(--font-sans);
+    font-synthesis-weight: none;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Belt and braces against horizontal scroll from any full-bleed graphic. */
+    overflow-x: clip;
   }
 
   /* Visible focus for keyboard users on every interactive element. */
@@ -95,6 +288,11 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -127,4 +325,342 @@
   background: var(--accent);
   color: var(--accent-ink);
   border-radius: 0.375rem;
+}
+
+/* ===================================================================
+ * THE SIGNATURE DEVICE — "signal rule"
+ *
+ * One idea, used everywhere: a hard-edged gradient bar running deep navy →
+ * azure → cyan. It is the eyebrow marker above section headings, the
+ * underline beneath the hero line, the spine of every Stat, and the top edge
+ * of a hovered card. Pure CSS gradient on a 1-element box: no images, no JS,
+ * no layout cost. It never sits behind or over text.
+ * =================================================================== */
+.signal-rule {
+  display: block;
+  background-image: var(--gradient-graphic);
+  border-radius: 999px;
+  transform-origin: left center;
+}
+
+.signal-rule[data-orientation='vertical'] {
+  transform-origin: center top;
+  background-image: linear-gradient(170deg, #123a5e 0%, #0e4c8f 42%, #06b6d4 100%);
+}
+
+:root[data-theme='dark'] .signal-rule[data-orientation='vertical'] {
+  background-image: linear-gradient(170deg, #2568d6 0%, #7faeff 45%, #67e8f9 100%);
+}
+
+/* Draw-in. The global reduced-motion rule collapses the duration, and the
+ * explicit reset below removes the transform entirely, so the rule simply
+ * exists at full size. */
+.signal-rule[data-animate='true'] {
+  animation: var(--animate-signal-draw);
+}
+
+.signal-rule[data-orientation='vertical'][data-animate='true'] {
+  animation-name: signal-draw-y;
+}
+
+@keyframes signal-draw-y {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-rule[data-animate='true'] {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Gradient text. Stops are chosen so each end independently meets AA against
+ * the page surface — see the token blocks above. A solid fallback colour is
+ * painted first for any engine without background-clip: text. */
+.text-gradient {
+  color: var(--accent);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .text-gradient {
+    background-image: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Descenders get clipped without a little breathing room. */
+    padding-bottom: 0.06em;
+  }
+}
+
+/* Faint blueprint grid, for full-bleed section backgrounds. Decorative only:
+ * it is always behind content and never reduces text contrast because it is
+ * drawn at very low alpha on the surface colour. */
+.blueprint-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+/* The grid lives on a pseudo-element so the fade mask only ever touches the
+ * decoration — masking the element itself would fade the text with it. */
+.blueprint-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image:
+    linear-gradient(to right, var(--overlay-tint) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--overlay-tint) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  -webkit-mask-image: radial-gradient(ellipse 110% 80% at 50% 0%, #000 0%, transparent 80%);
+  mask-image: radial-gradient(ellipse 110% 80% at 50% 0%, #000 0%, transparent 80%);
+}
+
+/* ===================================================================
+ * .prose — typographic wrapper for MDX bodies.
+ * Defined globally (not scoped) because MDX content is slotted in and Astro's
+ * scoped styles would not reach it. @tailwindcss/typography is NOT installed.
+ * =================================================================== */
+.prose {
+  color: var(--ink-muted);
+  font-size: var(--text-base);
+  line-height: 1.75;
+  max-width: var(--container-prose);
+}
+
+.prose > * + * {
+  margin-top: 1.25em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  scroll-margin-top: 6rem;
+  text-wrap: balance;
+}
+
+.prose h2 {
+  font-size: var(--text-2xl);
+  margin-top: 2.5em;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.prose h3 {
+  font-size: var(--text-xl);
+  margin-top: 2em;
+}
+
+.prose h4 {
+  font-size: var(--text-lg);
+  margin-top: 1.75em;
+}
+
+.prose h2:first-child,
+.prose h3:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.prose p {
+  text-wrap: pretty;
+}
+
+.prose strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.prose a {
+  color: var(--accent);
+  font-weight: 550;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  transition: text-decoration-color var(--duration-fast) ease;
+}
+
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+}
+
+.prose ul {
+  list-style: none;
+  padding-left: 1.35rem;
+}
+
+.prose ul > li {
+  position: relative;
+}
+
+.prose ul > li::before {
+  content: '';
+  position: absolute;
+  left: -1.35rem;
+  top: 0.7em;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background-image: var(--gradient-graphic);
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose ol > li::marker {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.prose li + li {
+  margin-top: 0.5em;
+}
+
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.5em;
+}
+
+.prose blockquote {
+  position: relative;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  color: var(--ink);
+  font-size: var(--text-lg);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Gradient spine. A `border-image` here would only show one slice of a
+ * horizontal gradient, so the bar is its own element. */
+.prose blockquote::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 4px;
+  border-radius: 999px;
+  background-image: linear-gradient(170deg, #123a5e 0%, #0e4c8f 42%, #06b6d4 100%);
+}
+
+:root[data-theme='dark'] .prose blockquote::before {
+  background-image: linear-gradient(170deg, #2568d6 0%, #7faeff 45%, #67e8f9 100%);
+}
+
+.prose blockquote p {
+  margin-top: 0;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--code-bg);
+  color: var(--ink);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0.15em 0.4em;
+  word-break: break-word;
+}
+
+.prose pre {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.prose pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  word-break: normal;
+}
+
+.prose hr {
+  border: 0;
+  height: 3px;
+  width: 4rem;
+  border-radius: 999px;
+  background-image: var(--gradient-graphic);
+  margin-block: 2.5em;
+}
+
+.prose img,
+.prose video {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.prose figcaption {
+  color: var(--ink-subtle);
+  font-size: var(--text-sm);
+  margin-top: 0.6em;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+}
+
+.prose th {
+  color: var(--ink);
+  font-weight: 650;
+  border-bottom-color: var(--border);
+  white-space: nowrap;
+}
+
+.prose kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-xs);
+  padding: 0.1em 0.35em;
+  color: var(--ink);
+}
+
+.prose-lg {
+  font-size: var(--text-lg);
+}
+
+.prose-lg p {
+  line-height: 1.7;
 }

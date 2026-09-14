@@ -1,0 +1,629 @@
+---
+/**
+ * Design-system proof page. Renders every primitive, every variant and every
+ * state, plus the palette with contrast ratios computed at build time (so the
+ * annotations can never drift from the tokens) and the full type scale.
+ *
+ * noindex — this is a working page, not site content.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Prose from '@/components/ui/Prose.astro';
+import Stat from '@/components/ui/Stat.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+
+/* ------------------------------------------------------------------ */
+/* WCAG 2.1 relative luminance + contrast, computed at build time.      */
+/* ------------------------------------------------------------------ */
+function channels(hex: string): number[] {
+  const h = hex.replace('#', '');
+  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+}
+
+function luminance(hex: string): number {
+  const [r, g, b] = channels(hex).map((c) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  );
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const themes = {
+  light: {
+    surface: '#ffffff',
+    'surface-raised': '#f5f8fc',
+    'surface-sunken': '#e9f0f9',
+    ink: '#08131f',
+    'ink-muted': '#41536b',
+    'ink-subtle': '#5a6b82',
+    border: '#78899f',
+    'border-strong': '#55677f',
+    accent: '#0e4c8f',
+    'accent-strong': '#123a5e',
+    'accent-ink': '#ffffff',
+    'accent-soft': '#dbe8fe',
+    'accent-soft-ink': '#123a5e',
+    signal: '#0e7490',
+    'signal-soft': '#cff4fb',
+    'signal-ink': '#ffffff',
+    'cta-stop-1': '#123a5e',
+    'cta-stop-2': '#0e4c8f',
+    'cta-stop-3': '#0e7490',
+  },
+  dark: {
+    surface: '#070c14',
+    'surface-raised': '#0f1826',
+    'surface-sunken': '#04080e',
+    ink: '#eaf1fa',
+    'ink-muted': '#a2b3c9',
+    'ink-subtle': '#8194ac',
+    border: '#5d7595',
+    'border-strong': '#7b93b3',
+    accent: '#7faeff',
+    'accent-strong': '#bfd7fe',
+    'accent-ink': '#071a2c',
+    'accent-soft': '#14243a',
+    'accent-soft-ink': '#bfd7fe',
+    signal: '#22d3ee',
+    'signal-soft': '#0b2b35',
+    'signal-ink': '#04121a',
+    'cta-stop-1': '#7faeff',
+    'cta-stop-2': '#a5c8ff',
+    'cta-stop-3': '#67e8f9',
+  },
+} as const;
+
+type ThemeName = keyof typeof themes;
+
+/** Widened lookup so the template can index by token name. */
+const themeMap: Record<ThemeName, Record<string, string>> = themes;
+
+/** [token, background token, required ratio, what it is used for] */
+const checks: Array<[string, string, number, string]> = [
+  ['ink', 'surface', 4.5, 'body copy'],
+  ['ink', 'surface-raised', 4.5, 'body copy on cards'],
+  ['ink', 'surface-sunken', 4.5, 'body copy on sunken bands'],
+  ['ink-muted', 'surface', 4.5, 'secondary copy'],
+  ['ink-muted', 'surface-raised', 4.5, 'secondary copy on cards'],
+  ['ink-muted', 'surface-sunken', 4.5, 'secondary copy on bands'],
+  ['ink-subtle', 'surface', 4.5, 'meta / captions'],
+  ['ink-subtle', 'surface-raised', 4.5, 'meta on cards'],
+  ['ink-subtle', 'surface-sunken', 4.5, 'meta on bands'],
+  ['accent', 'surface', 4.5, 'links, accent text'],
+  ['accent', 'surface-raised', 4.5, 'links on cards'],
+  ['accent-strong', 'surface', 4.5, 'gradient-text dark stop'],
+  ['signal', 'surface', 4.5, 'secondary accent text'],
+  ['signal', 'surface-raised', 4.5, 'secondary accent on cards'],
+  ['accent-ink', 'accent', 4.5, 'primary button label'],
+  ['accent-ink', 'cta-stop-1', 4.5, 'primary button label · gradient start'],
+  ['accent-ink', 'cta-stop-2', 4.5, 'primary button label · gradient middle'],
+  ['accent-ink', 'cta-stop-3', 4.5, 'primary button label · gradient end'],
+  ['accent-soft-ink', 'accent-soft', 4.5, 'accent badge label'],
+  ['signal', 'signal-soft', 4.5, 'signal badge label'],
+  ['signal-ink', 'signal', 4.5, 'label on solid signal'],
+  ['border', 'surface', 3, 'UI border'],
+  ['border', 'surface-raised', 3, 'UI border on cards'],
+  ['border', 'surface-sunken', 3, 'UI border on bands'],
+  ['border-strong', 'surface', 3, 'emphasised border'],
+];
+
+function rowsFor(theme: ThemeName) {
+  const t = themeMap[theme];
+  return checks.map(([fg, bg, need, use]) => {
+    const ratio = contrast(t[fg], t[bg]);
+    return { fg, bg, need, use, fgHex: t[fg], bgHex: t[bg], ratio, pass: ratio >= need };
+  });
+}
+
+const tables = { light: rowsFor('light'), dark: rowsFor('dark') };
+const failures = [...tables.light, ...tables.dark].filter((r) => !r.pass).length;
+
+const typeScale: Array<[string, string, string]> = [
+  ['text-display', 'Display', '2.75rem → 6.5rem'],
+  ['text-stat', 'Stat', '2.25rem → 4rem'],
+  ['text-5xl', '5xl', '2.5rem → 4.5rem'],
+  ['text-4xl', '4xl', '2.125rem → 3.25rem'],
+  ['text-3xl', '3xl', '1.75rem → 2.375rem'],
+  ['text-2xl', '2xl', '1.375rem → 1.75rem'],
+  ['text-xl', 'xl', '1.1875rem → 1.375rem'],
+  ['text-lg', 'lg', '1.125rem'],
+  ['text-base', 'base', '1rem'],
+  ['text-sm', 'sm', '0.875rem'],
+  ['text-xs', 'xs', '0.75rem'],
+  ['text-2xs', '2xs', '0.6875rem'],
+];
+
+const swatchGroups: Array<[string, string[]]> = [
+  ['Surfaces', ['surface', 'surface-raised', 'surface-sunken']],
+  ['Ink', ['ink', 'ink-muted', 'ink-subtle']],
+  ['Lines', ['border', 'border-strong']],
+  ['Accent', ['accent', 'accent-strong', 'accent-soft', 'accent-ink']],
+  ['Signal', ['signal', 'signal-soft', 'signal-ink']],
+];
+---
+
+<BaseLayout title="Styleguide" description="Design system proof page." noindex>
+  <Container size="wide" class="py-12 sm:py-16">
+    <!-- Header ------------------------------------------------------- -->
+    <header class="flex flex-wrap items-start justify-between gap-6">
+      <div>
+        <p class="mb-4 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+          <SignalRule length="1.75rem" thickness="3px" />
+          Design system
+        </p>
+        <h1 class="text-5xl font-extrabold text-balance text-ink">
+          Bold type. <span class="text-gradient">One signal.</span>
+        </h1>
+        <p class="mt-4 max-w-xl text-lg text-pretty text-ink-muted">
+          Every primitive, every variant, every state — plus the palette with computed contrast
+          ratios and the full type scale.
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <Badge variant={failures === 0 ? 'accent' : 'outline'} size="md" dot>
+          {failures === 0 ? 'AA: all pairs pass' : `${failures} contrast failures`}
+        </Badge>
+        <ThemeToggle />
+      </div>
+    </header>
+
+    <div class="mt-16 space-y-20 sm:mt-20 sm:space-y-28">
+      <!-- Signature device ------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="signature"
+          eyebrow="Signature"
+          title="The signal rule"
+          description="One device carries the site's identity: a hard gradient bar running deep navy → azure → cyan. It marks section eyebrows, underlines the hero, forms the spine of a stat and wipes across the top of a hovered card. Pure CSS, never behind or over text, and the draw-in is dropped entirely under reduced motion."
+        />
+        <div class="mt-8 grid gap-4 sm:grid-cols-2">
+          <Card variant="raised" padding="lg">
+            <p class="text-xs font-semibold tracking-widest text-ink-subtle uppercase">
+              Horizontal · animated
+            </p>
+            <div class="mt-5 space-y-4">
+              <SignalRule length="full" thickness="6px" animate />
+              <SignalRule length="60%" thickness="4px" animate />
+              <SignalRule length="30%" thickness="3px" animate />
+            </div>
+          </Card>
+          <Card variant="raised" padding="lg">
+            <p class="text-xs font-semibold tracking-widest text-ink-subtle uppercase">
+              Vertical · gradient text
+            </p>
+            <div class="mt-5 flex items-stretch gap-5">
+              <SignalRule orientation="vertical" length="5rem" thickness="6px" />
+              <p class="text-gradient text-3xl font-extrabold">18 years, shipped.</p>
+            </div>
+          </Card>
+        </div>
+        <div class="blueprint-grid mt-4 rounded-xl border border-border-subtle bg-surface-raised p-6">
+          <p class="text-xs font-semibold tracking-widest text-ink-subtle uppercase">
+            Blueprint grid (decorative background)
+          </p>
+          <p class="mt-2 max-w-md text-ink-muted">
+            Drawn at 6–8% alpha behind a radial mask, so it never measurably reduces the contrast of
+            anything sitting on top of it.
+          </p>
+        </div>
+      </section>
+
+      <!-- Palette ---------------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="palette"
+          eyebrow="Colour"
+          title="Palette & contrast"
+          description="Ratios below are computed from the token hex values at build time using the WCAG 2.1 formula — nothing here is eyeballed."
+        />
+
+        <div class="mt-8 space-y-8">
+          {
+            (['light', 'dark'] as ThemeName[]).map((theme) => (
+              <div>
+                <h3 class="text-xl font-bold text-ink capitalize">{theme} theme</h3>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {swatchGroups.map(([group, names]) => (
+                    <Card padding="sm">
+                      <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">
+                        {group}
+                      </p>
+                      <ul class="mt-3 space-y-2">
+                        {names.map((name) => (
+                          <li class="flex items-center gap-3">
+                            <span
+                              class="size-8 shrink-0 rounded-md border border-border-subtle"
+                              style={`background:${themeMap[theme][name]}`}
+                            />
+                            <span class="min-w-0">
+                              <span class="block truncate text-sm font-semibold text-ink">
+                                {name}
+                              </span>
+                              <span class="block font-mono text-xs text-ink-subtle uppercase">
+                                {themeMap[theme][name]}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  ))}
+                </div>
+
+                <div class="mt-4 overflow-x-auto rounded-xl border border-border-subtle">
+                  <table class="w-full min-w-[34rem] border-collapse text-sm">
+                    <caption class="sr-only">
+                      Computed contrast ratios for the {theme} theme
+                    </caption>
+                    <thead>
+                      <tr class="bg-surface-sunken text-left">
+                        <th class="px-3 py-2 font-semibold text-ink">Foreground</th>
+                        <th class="px-3 py-2 font-semibold text-ink">Background</th>
+                        <th class="px-3 py-2 font-semibold text-ink">Used for</th>
+                        <th class="px-3 py-2 text-right font-semibold text-ink">Ratio</th>
+                        <th class="px-3 py-2 text-right font-semibold text-ink">Needs</th>
+                        <th class="px-3 py-2 text-right font-semibold text-ink">AA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tables[theme].map((r) => (
+                        <tr class="border-t border-border-subtle">
+                          <td class="px-3 py-2 font-mono text-xs text-ink">{r.fg}</td>
+                          <td class="px-3 py-2 font-mono text-xs text-ink-muted">{r.bg}</td>
+                          <td class="px-3 py-2 text-ink-muted">{r.use}</td>
+                          <td class="px-3 py-2 text-right font-mono tabular-nums text-ink">
+                            {r.ratio.toFixed(2)}:1
+                          </td>
+                          <td class="px-3 py-2 text-right font-mono tabular-nums text-ink-subtle">
+                            {r.need}:1
+                          </td>
+                          <td class="px-3 py-2 text-right">
+                            <Badge variant={r.pass ? 'accent' : 'outline'}>
+                              {r.pass ? 'pass' : 'FAIL'}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Type ------------------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="type"
+          eyebrow="Typography"
+          title="Type scale"
+          description="Inter Variable. Headings are fluid via clamp(); body sizes stay fixed so reading measure never wobbles."
+        />
+        <div class="mt-8 divide-y divide-border-subtle">
+          {
+            typeScale.map(([cls, name, range]) => (
+              <div class="flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6">
+                <div class="shrink-0 sm:w-40">
+                  <span class="font-mono text-xs text-ink-subtle">{cls}</span>
+                  <span class="ml-2 text-xs text-ink-subtle">{range}</span>
+                </div>
+                <p class:list={[cls, 'min-w-0 font-extrabold text-ink']}>{name} — Diogo Ferreira</p>
+              </div>
+            ))
+          }
+        </div>
+        <div class="mt-8 grid gap-4 sm:grid-cols-3">
+          <Card padding="md">
+            <p class="text-sm font-semibold text-ink">Weights</p>
+            <p class="mt-2 text-lg font-normal text-ink">Regular 400</p>
+            <p class="text-lg font-medium text-ink">Medium 500</p>
+            <p class="text-lg font-semibold text-ink">Semibold 600</p>
+            <p class="text-lg font-bold text-ink">Bold 700</p>
+            <p class="text-lg font-extrabold text-ink">Extrabold 800</p>
+          </Card>
+          <Card padding="md">
+            <p class="text-sm font-semibold text-ink">Ink levels</p>
+            <p class="mt-2 text-ink">ink — primary copy</p>
+            <p class="text-ink-muted">ink-muted — secondary</p>
+            <p class="text-ink-subtle">ink-subtle — meta</p>
+          </Card>
+          <Card padding="md">
+            <p class="text-sm font-semibold text-ink">Mono</p>
+            <p class="mt-2 font-mono text-sm text-ink-muted">const latency = '2.5s';</p>
+            <p class="mt-2 text-sm text-ink-muted">Tabular numerals: <span class="tabular-nums">0123456789</span></p>
+          </Card>
+        </div>
+      </section>
+
+      <!-- Buttons ---------------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="buttons"
+          eyebrow="Primitives"
+          title="Button"
+          description="Renders an <a> when href is set, a <button> otherwise. Variants: primary / secondary / ghost. Sizes: sm / md / lg. Hover, focus-visible and disabled all shown below."
+        />
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {
+            (['primary', 'secondary', 'ghost'] as const).map((variant) => (
+              <Card variant="raised" padding="lg">
+                <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">{variant}</p>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <Button variant={variant} size="lg">
+                    Large
+                  </Button>
+                  <Button variant={variant} size="md">
+                    Medium
+                  </Button>
+                  <Button variant={variant} size="sm">
+                    Small
+                  </Button>
+                </div>
+                <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <Button variant={variant} href="#buttons">
+                    As link
+                  </Button>
+                  <Button variant={variant} href="https://example.com" external>
+                    External
+                  </Button>
+                  <Button variant={variant} disabled>
+                    Disabled
+                  </Button>
+                </div>
+              </Card>
+            ))
+          }
+        </div>
+        <Card padding="lg" class="mt-4">
+          <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">
+            Full-width (block)
+          </p>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <Button block href="/diogo-ferreira-cv.pdf">Download CV</Button>
+            <Button block variant="secondary" href="/#contact">Get in touch</Button>
+          </div>
+        </Card>
+      </section>
+
+      <!-- Badges ----------------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="badges"
+          eyebrow="Primitives"
+          title="Badge"
+          description="Variants: neutral / accent / signal / outline. Sizes sm and md, with an optional status dot."
+        />
+        <div class="mt-8 grid gap-4 sm:grid-cols-2">
+          <Card padding="lg">
+            <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">Variants</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <Badge>neutral</Badge>
+              <Badge variant="accent">accent</Badge>
+              <Badge variant="signal">signal</Badge>
+              <Badge variant="outline">outline</Badge>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <Badge size="md" dot>neutral · md · dot</Badge>
+              <Badge variant="accent" size="md" dot>Open to work</Badge>
+            </div>
+          </Card>
+          <Card padding="lg">
+            <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">
+              In use — a stack list
+            </p>
+            <ul class="mt-4 flex flex-wrap gap-2">
+              {
+                ['AWS', 'TypeScript', 'Node.js', 'React', 'Terraform', 'PostgreSQL', 'Docker'].map(
+                  (item) => (
+                    <li>
+                      <Badge variant="outline">{item}</Badge>
+                    </li>
+                  )
+                )
+              }
+            </ul>
+          </Card>
+        </div>
+      </section>
+
+      <!-- Stats ------------------------------------------------------ -->
+      <section>
+        <SectionHeading
+          id="stats"
+          eyebrow="Primitives"
+          title="Stat"
+          description="The metrics band. Oversized gradient numerals carry most of the bold, with a plain-language label directly underneath — nothing needs to be hovered to be read."
+        />
+        <div class="mt-8 rounded-2xl border border-border-subtle bg-surface-raised p-6 sm:p-10">
+          <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+            <Stat value="10s → 2.5s" label="Checkout latency" detail="Full rebuild of the flow and its infrastructure." />
+            <Stat value="18" label="Years shipping" detail="Payments, regulated gaming, healthcare, automotive." />
+            <Stat value="~96%" label="Catalogue sync rate" detail="25k products synced daily via Shopify." />
+          </div>
+        </div>
+        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+          <Card padding="lg"><Stat size="sm" spine value="3.5 → 6.8" label="Delivery velocity" /></Card>
+          <Card padding="lg"><Stat size="sm" spine value="60% → 15%" label="Change failure rate" /></Card>
+          <Card padding="lg"><Stat size="sm" spine value="5d → 1.5d" label="Median cycle time" /></Card>
+        </div>
+      </section>
+
+      <!-- Cards ------------------------------------------------------ -->
+      <section>
+        <SectionHeading
+          id="cards"
+          eyebrow="Primitives"
+          title="Card"
+          description="Variants: default / raised / sunken / feature. Padding none / sm / md / lg. With href the whole card is one link and one tab stop — tab into the last card below to see the focus treatment."
+        />
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {
+            (['default', 'raised', 'sunken', 'feature'] as const).map((variant) => (
+              <Card variant={variant} padding="lg" as="article">
+                <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">{variant}</p>
+                <h3 class="mt-3 text-xl font-bold text-ink">Checkout rebuild</h3>
+                <p class="mt-2 text-sm text-ink-muted">
+                  Rebuilt the flow and the marketplace infrastructure underneath it.
+                </p>
+              </Card>
+            ))
+          }
+        </div>
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+          <Card href="#cards" variant="raised" padding="lg">
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">
+                Linked card — hover or focus me
+              </p>
+              <Badge variant="accent">Case study</Badge>
+            </div>
+            <h3 class="mt-3 text-2xl font-bold text-ink">Agriluso</h3>
+            <p class="mt-2 text-ink-muted">
+              Solo-architected multi-service agri-tech platform: NestJS, PostGIS, Redis, React
+              Native.
+            </p>
+            <p class="mt-4 text-sm font-semibold text-accent">Read the case study →</p>
+          </Card>
+          <Card href="https://example.com" external variant="raised" padding="lg">
+            <p class="text-2xs font-bold tracking-widest text-ink-subtle uppercase">
+              Linked card — external
+            </p>
+            <h3 class="mt-3 text-2xl font-bold text-ink">GLI certification</h3>
+            <p class="mt-2 text-ink-muted">
+              Owned certification end to end for the regulated US gaming market.
+            </p>
+          </Card>
+        </div>
+      </section>
+
+      <!-- Section heading -------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="headings"
+          eyebrow="Primitives"
+          title="SectionHeading"
+          description="Eyebrow + title + optional description, with an id on the wrapper so nav anchors land correctly under the sticky header."
+        />
+        <div class="mt-8 grid gap-4 lg:grid-cols-2">
+          <Card padding="lg">
+            <SectionHeading eyebrow="Selected work" title="Systems that had to hold" as="h3" size="md" description="Size md, left aligned — the default for in-page sections." />
+          </Card>
+          <Card padding="lg">
+            <SectionHeading title="No eyebrow, centred" as="h3" size="md" align="center" description="Centred variant for short standalone bands." />
+          </Card>
+        </div>
+      </section>
+
+      <!-- Prose ------------------------------------------------------ -->
+      <section>
+        <SectionHeading
+          id="prose"
+          eyebrow="Primitives"
+          title="Prose"
+          description="The wrapper MDX bodies render inside. Styled entirely in CSS — @tailwindcss/typography is not installed."
+        />
+        <Card padding="lg" class="mt-8">
+          <Prose>
+            <h2>Rebuilding checkout</h2>
+            <p>
+              The old flow took around <strong>ten seconds</strong> to settle. The rebuild brought
+              it under 2.5s by collapsing three sequential round-trips into one and moving pricing
+              off the critical path. Read the <a href="#prose">full write-up</a>.
+            </p>
+            <h3>What changed</h3>
+            <ul>
+              <li>Single pricing call, computed server-side and cached per basket.</li>
+              <li>
+                Payment intents created ahead of confirmation.
+                <ul>
+                  <li>Eight payment methods behind one interface.</li>
+                </ul>
+              </li>
+              <li>Idempotency keys on every mutating endpoint.</li>
+            </ul>
+            <ol>
+              <li>Measure.</li>
+              <li>Remove the round-trip.</li>
+              <li>Measure again.</li>
+            </ol>
+            <blockquote>
+              The fastest request is the one you never make.
+            </blockquote>
+            <p>
+              Inline code looks like <code>await stripe.paymentIntents.create()</code>, and blocks
+              scroll rather than overflow:
+            </p>
+            <pre><code>{`const intent = await stripe.paymentIntents.create({
+  amount,
+  currency: 'gbp',
+  automatic_payment_methods: { enabled: true },
+});`}</code></pre>
+            <hr />
+            <table>
+              <thead>
+                <tr><th>Metric</th><th>Before</th><th>After</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Checkout latency</td><td>~10s</td><td>&lt;2.5s</td></tr>
+                <tr><td>Change failure rate</td><td>~60%</td><td>&lt;15%</td></tr>
+              </tbody>
+            </table>
+            <p>Press <kbd>⌘K</kbd> to search.</p>
+          </Prose>
+        </Card>
+      </section>
+
+      <!-- Theme toggle ------------------------------------------------ -->
+      <section>
+        <SectionHeading
+          id="theme"
+          eyebrow="Primitives"
+          title="ThemeToggle"
+          description="The only client-side JavaScript on the site. The icon and the accessible label swap purely from the data-theme attribute, so the correct state is painted in the first frame even before the script runs."
+        />
+        <Card padding="lg" class="mt-8">
+          <div class="flex flex-wrap items-center gap-6">
+            <ThemeToggle />
+            <p class="text-ink-muted">
+              Persists to <code class="font-mono text-sm text-ink">localStorage</code> inside a
+              try/catch, so private-mode browsers still toggle for the session.
+            </p>
+          </div>
+        </Card>
+      </section>
+
+      <!-- Focus ------------------------------------------------------- -->
+      <section>
+        <SectionHeading
+          id="focus"
+          eyebrow="Accessibility"
+          title="Focus & keyboard"
+          description="Tab through this row: every interactive element takes a visible 2px accent outline with a 2px offset. Nothing traps focus, and no content is gated behind hover."
+        />
+        <Card padding="lg" class="mt-8">
+          <div class="flex flex-wrap items-center gap-4">
+            <Button size="sm">Button</Button>
+            <Button size="sm" variant="secondary" href="#focus">Link</Button>
+            <Button size="sm" variant="ghost">Ghost</Button>
+            <ThemeToggle />
+            <a href="#focus" class="font-semibold text-accent underline underline-offset-4">
+              Plain inline link
+            </a>
+          </div>
+        </Card>
+      </section>
+    </div>
+  </Container>
+</BaseLayout>

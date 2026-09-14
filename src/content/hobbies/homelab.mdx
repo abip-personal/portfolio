@@ -1,0 +1,23 @@
+---
+title: "Homelab"
+blurb: "Self-hosted infrastructure at home: somewhere to run things properly, and somewhere to break things safely."
+glyph: "🖥️"
+tags:
+  - "Self-hosting"
+  - "Infrastructure"
+  - "Docker"
+  - "Homelab"
+order: 2
+---
+
+A homelab is the cheapest way I know to keep infrastructure instincts sharp. Work gives you a cloud account with guardrails on it; a machine at home gives you the failure modes that the guardrails normally hide — the disk that fills, the certificate that expires, the container that comes back in the wrong order after a power cut.
+
+It also makes ideas from work cheap to test. Running self-hosted LLMs via Ollama is something I do at work, where it gave the team a local option for cases where sending code to a third party was not the right default; the instinct to reach for a self-hosted version of a thing first comes from the same place.
+
+{/* TODO(diogo): what's the hardware — a NAS, mini PCs, a repurposed desktop, a rack? Don't want to invent a parts list. */}
+{/* TODO(diogo): what's actually self-hosted on it, and which of those services do other people in the house depend on? */}
+{/* TODO(diogo): how is it orchestrated — plain Docker Compose, Proxmox, k3s, something else? */}
+{/* TODO(diogo): do you run Ollama or any local models at home, or is that only a work thing? I've deliberately only claimed the work usage. */}
+{/* TODO(diogo): what monitoring is on it — Grafana/Prometheus like at work, or something lighter? */}
+{/* TODO(diogo): backups: what's the strategy, and have you ever had to actually restore from one? */}
+{/* TODO(diogo): what's the worst thing that has gone wrong, and what did fixing it teach you? */}

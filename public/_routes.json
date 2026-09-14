@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "No Pages Functions: every request is served from static assets.",
+  "include": [],
+  "exclude": ["/*"]
+}

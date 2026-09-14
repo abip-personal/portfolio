@@ -1,0 +1,51 @@
+---
+/**
+ * Small label: tech-stack chips, availability pills, post tags.
+ * `dot` adds a status dot — used for the "open to work" state.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'neutral' | 'accent' | 'signal' | 'outline';
+type Size = 'sm' | 'md';
+
+interface Props extends HTMLAttributes<'span'> {
+  variant?: Variant;
+  size?: Size;
+  dot?: boolean;
+  class?: string;
+}
+
+const { variant = 'neutral', size = 'sm', dot = false, class: className, ...rest } = Astro.props;
+
+const sizes: Record<Size, string> = {
+  sm: 'text-xs px-2.5 py-1',
+  md: 'text-sm px-3 py-1.5',
+};
+
+const variants: Record<Variant, string> = {
+  neutral: 'bg-surface-sunken text-ink-muted border-border-subtle',
+  accent: 'bg-accent-soft text-accent-soft-ink border-transparent',
+  signal: 'bg-signal-soft text-signal border-transparent',
+  outline: 'bg-transparent text-ink-muted border-border',
+};
+
+const dots: Record<Variant, string> = {
+  neutral: 'bg-ink-subtle',
+  accent: 'bg-accent',
+  signal: 'bg-signal',
+  outline: 'bg-accent',
+};
+---
+
+<span
+  class:list={[
+    'inline-flex items-center gap-1.5 rounded-full border font-medium tracking-[0.01em] whitespace-nowrap',
+    sizes[size],
+    variants[variant],
+    className,
+  ]}
+  {...rest}
+>
+  {dot && <span aria-hidden="true" class:list={['size-1.5 shrink-0 rounded-full', dots[variant]]} />}
+  <slot />
+</span>

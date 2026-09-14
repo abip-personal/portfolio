@@ -8,6 +8,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "lint:links": "node scripts/check-links.mjs dist",
+    "lighthouse": "npx -y @lhci/cli@0.15.x autorun --config=./lighthouserc.json",
+    "verify": "npm run check && npm run build && npm run lint:links",
+    "deploy": "npm run build && npx -y wrangler@4 pages deploy",
     "astro": "astro"
   },
   "dependencies": {
@@ -19,7 +23,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.2",
-    "satori": "^0.33.4",
+    "fontkitten": "^1.0.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "zod": "^4.6.5"

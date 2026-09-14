@@ -1,0 +1,99 @@
+---
+title: "Agriluso"
+blurb: "A multi-service platform connecting Portuguese farmers and agronomists in real time. Solo-architected and built, from data model to deployment target."
+role: "Founder, sole architect and engineer"
+org: "Agriluso"
+period: "In active development, pre-launch"
+treatment: "deep-dive"
+stack:
+  - "NestJS"
+  - "TypeORM"
+  - "PostgreSQL/PostGIS"
+  - "Redis"
+  - "Socket.io"
+  - "React Native"
+  - "Expo"
+  - "Docker"
+  - "AWS (target)"
+metrics:
+  - value: "3"
+    label: "services"
+    detail: "REST API, real-time chat service with NLP-based smart actions, and a weather/phytosanitary data ingestion service."
+  - value: "1"
+    label: "engineer"
+    detail: "Solo-architected and built end to end, including the mobile app."
+featured: true
+order: 2
+confidential: false
+draft: false
+---
+
+## Context
+
+Agriluso ([agriluso.pt](https://agriluso.pt)) connects Portuguese farmers with agronomists in real time. A farmer with a problem in a field — a pest, a disease, a question about a treatment window — should be able to reach a qualified agronomist, share what they are looking at, and get an answer that is recorded properly.
+
+The "recorded properly" part is the interesting half. Portuguese farmers are legally required to keep a field logbook of treatments applied. It is paperwork nobody wants to do and everybody has to, and it is generated as a by-product of exactly the conversations the platform already hosts.
+
+I am the sole architect and engineer on it. It is in active development and pre-launch.
+
+## Constraints
+
+- **The users are not technical, and they are outdoors.** The mobile app has to work with intermittent or absent connectivity and it has to survive being used with one hand in a field.
+- **Geography is a first-class part of the data model.** Parcels, treatments and advice are all located. This is not a lat/long column bolted onto a table.
+- **Personal data, and a legal record.** GDPR applies, and the logbook is a compliance artefact, so its integrity matters more than most application data.
+- **One engineer.** Every service I add is a service I operate. That is the dominant constraint on the whole design.
+
+{/* TODO(diogo): what's the actual scale target at launch — number of farmers/agronomists, expected concurrent chat sessions? It changes how defensible some of the choices below read. */}
+
+## Architecture
+
+Three services, chosen because they have genuinely different runtime shapes, not because microservices are fashionable.
+
+The **REST API** (NestJS, TypeORM, PostgreSQL with PostGIS) owns the domain: users, parcels, crops, treatments, the logbook. PostGIS rather than application-level geo maths, because parcel geometry, containment and proximity queries belong in the database where they can be indexed.
+
+The **real-time chat service** (Socket.io, Redis) handles the conversation between farmer and agronomist. Redis carries pub/sub across instances and session state. On top of the message stream sits an NLP layer that recognises actionable intent in what people are already typing — a mentioned treatment, a product, a date — and surfaces it as a smart action rather than asking the user to fill in a form.
+
+The **ingestion service** pulls weather and phytosanitary data on a schedule and normalises it into the same geographic model, so advice can be contextualised by what is actually happening in that area.
+
+The **mobile app** is React Native and Expo, built offline-resilient: local writes queue and reconcile when connectivity returns.
+
+{/* DIAGRAM: React Native/Expo app at the top with a local queue box attached, drawn with a dashed "offline" arrow. Below it, three service boxes side by side: REST API (NestJS) → PostgreSQL/PostGIS; chat service (Socket.io) → Redis, with a bidirectional websocket arrow up to the app and a side arrow to an NLP smart-actions box; ingestion service pulling from two external sources (weather feed, phytosanitary feed) on a schedule and writing into PostgreSQL/PostGIS. An arrow from the chat service into the REST API showing that a confirmed smart action writes a logbook entry. All three services shown as Docker containers, with AWS marked as the deployment target. */}
+
+The logbook is the join between the two halves: a smart action confirmed in chat becomes a structured treatment record in the API, which is what the legally required digital logbook is generated from.
+
+{/* TODO(diogo): how does offline reconciliation resolve conflicts — last-write-wins, per-field merge, or does the domain make conflicts impossible? */}
+{/* TODO(diogo): is the NLP layer a hosted model, a local one, or rule/classifier-based? I have deliberately not said, since the CV only says "NLP-based". */}
+
+## Key decisions
+
+**PostGIS instead of geo in the application layer.** The alternative — store coordinates, do containment and distance in Node — is simpler to start and needs no extension. It loses as soon as you want "which parcels are within this alert zone" to be fast and correct across polygon geometry rather than points. Doing that in application code means reimplementing spatial indexing badly.
+
+**A separate chat service rather than websockets in the monolith.** Keeping it in the API would be one fewer thing to deploy, which matters a lot when you are one person. It loses because the connection-heavy, long-lived, memory-resident workload scales along a completely different axis from the request/response API. Coupling them means scaling the API for chat connections, or degrading chat when the API is under load.
+
+**Offline-first in the mobile app, not offline-tolerant.** Treating connectivity as normal and offline as an error state is far less code. It loses because the actual usage location is a field. If the app is only usable back at the house, the logbook gets filled in from memory later, which is exactly the failure mode the product exists to remove.
+
+**Extract structure from conversation rather than ask for it in a form.** A form is unambiguous and trivial to build. It loses on adoption: a farmer mid-problem will describe the problem, not complete a treatment record. Making the smart action a confirmation step over extracted data puts the compliance work where the user already is.
+
+**GDPR handling built in from the first migration.** Consent, export and erasure designed in rather than added later. The cost is real up front. Retrofitting erasure across a schema with denormalised personal data is a rewrite, and I have watched that happen elsewhere.
+
+## Results
+
+The platform is pre-launch, so the honest result statement is about what exists and works, not about traction:
+
+- Three services running under Docker with AWS as the deployment target.
+- A REST API over PostgreSQL/PostGIS covering the full domain model, with GDPR-by-design consent, export and erasure.
+- A real-time chat service with NLP-driven smart actions feeding structured records.
+- A React Native/Expo mobile app that functions without connectivity.
+- Automatic generation of the legally required digital field logbook as a by-product of normal use.
+
+{/* TODO(diogo): any pilot users, agronomists onboarded, or field testing done? Concrete pre-launch validation is worth stating and I have not assumed any. */}
+
+## What I'd do differently
+
+**I split into three services earlier than the load justified.** The shapes really are different, and I would make the same call again for chat. But the ingestion service could have started as a scheduled job inside the API and been extracted when it earned it. As a solo engineer I paid the operational cost of a third deployable long before there was traffic to justify it.
+
+**The NLP smart actions should have shipped after the logbook, not alongside it.** The logbook is the feature that makes the product legally useful. Smart actions make it pleasant. I built them close together and it slowed down proving the thing that actually matters.
+
+**Choosing TypeORM.** It is fine, and moving now would not pay for itself. But I have spent more time than I would like working around its behaviour on the spatial and migration paths specifically, and I would look harder at the alternatives before committing again.
+
+{/* TODO(diogo): is the TypeORM friction real and specific — which parts? If it's not a genuine regret, I'd rather replace this bullet with one that is. */}

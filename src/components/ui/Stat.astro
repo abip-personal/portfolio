@@ -1,0 +1,51 @@
+---
+/**
+ * A headline number. This carries much of the "bold" weight of the design:
+ * an oversized gradient numeral, spined by the signature signal rule, with a
+ * plain-language label under it. Used for the metrics band and case studies.
+ */
+import SignalRule from './SignalRule.astro';
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** e.g. "10s → 2.5s", "18", "100%". */
+  value: string;
+  /** e.g. "checkout latency". */
+  label: string;
+  /** Optional supporting sentence. */
+  detail?: string;
+  size?: 'sm' | 'md';
+  /** Vertical gradient spine on the left instead of a rule underneath. */
+  spine?: boolean;
+  class?: string;
+}
+
+const {
+  value,
+  label,
+  detail,
+  size = 'md',
+  spine = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const valueSize = size === 'md' ? 'text-stat' : 'text-stat-sm';
+---
+
+<div
+  class:list={['flex gap-4', spine ? 'items-stretch' : 'flex-col', className]}
+  {...rest}
+>
+  {spine && <SignalRule orientation="vertical" length="full" thickness="4px" class="shrink-0" />}
+  <div class="min-w-0">
+    {/* Rule sits above the numeral so a row of Stats aligns even when one
+        value wraps onto a second line. */}
+    {!spine && <SignalRule length="2.5rem" thickness="4px" class="mb-4" />}
+    <p class:list={[valueSize, 'text-gradient font-extrabold break-words tabular-nums']}>
+      {value}
+    </p>
+    <p class="mt-3 text-sm font-semibold tracking-wide text-ink uppercase">{label}</p>
+    {detail && <p class="mt-1.5 text-sm text-ink-muted">{detail}</p>}
+  </div>
+</div>

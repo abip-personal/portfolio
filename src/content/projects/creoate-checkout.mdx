@@ -1,0 +1,95 @@
+---
+title: "Rebuilding checkout on a B2B marketplace"
+blurb: "A full rebuild of the checkout flow and the marketplace infrastructure under it, taking checkout from ~10s to under 2.5s."
+role: "Software Technical Lead"
+org: "Creoate"
+period: "2022 – present"
+treatment: "deep-dive"
+stack:
+  - "TypeScript"
+  - "Node.js"
+  - "React"
+  - "AWS"
+  - "Lambda"
+  - "SQS/SNS"
+  - "Terraform"
+  - "Docker"
+  - "Stripe"
+  - "Grafana"
+metrics:
+  - value: "~10s → <2.5s"
+    label: "checkout latency"
+    detail: "End-to-end time for a buyer to complete a multi-seller order after the rebuild."
+  - value: "8"
+    label: "payment methods"
+    detail: "Enabled through the Stripe integration, alongside BNPL and shipping/logistics providers."
+featured: true
+order: 1
+confidential: true
+draft: false
+---
+
+## Context
+
+Creoate is a B2B wholesale marketplace: retailers buy from many independent brands in one basket. I joined as the hands-on technical owner for architecture and delivery, working inside a team of four to six engineers.
+
+The checkout was the part of the platform where every other problem showed up at once. A single buyer basket fans out into one order per seller, each with its own shipping rules, its own minimum order value, and its own fulfilment timeline — but the buyer pays once. The existing flow did all of that work synchronously, in-request, and a checkout took around ten seconds. That is long enough that buyers assume it has failed, refresh, and create the exact duplicate-order problem you least want in a payments path.
+
+I designed and built the rebuild of that flow and of the marketplace infrastructure underneath it.
+
+## Constraints
+
+A few things were fixed before I started designing:
+
+- **The money path cannot have a maintenance window.** The old checkout had to keep taking orders while the new one was being built, so the rebuild had to land incrementally rather than as a cutover.
+- **Payments are the one place you cannot be eventually correct.** Split payments across many sellers mean a partial failure can leave a buyer charged for goods no seller has accepted.
+- **Small team, several deploys a day.** Whatever I built had to be operable by four to six engineers shipping continuously, not by a platform team that did not exist.
+- **Third parties set the latency floor.** Stripe, the shipping and logistics providers, and the BNPL providers all sit in the path and none of them are fast or reliable on demand.
+
+{/* TODO(diogo): were there hard regulatory or PSP constraints on checkout — SCA/3DS step-up, PSD2 — that shaped the flow? Worth naming if so. */}
+
+## Architecture
+
+The core move was to stop treating checkout as one long synchronous transaction and start treating it as a short, durable one followed by an asynchronous fan-out.
+
+The request path now does the minimum that must be correct-on-write: validate the basket, resolve per-seller shipping and totals, create the order aggregate, and take payment authorisation. Everything that does not have to block the buyer — seller notification, catalogue and inventory reconciliation, logistics booking, analytics — moved behind events onto queues, with retries and dead-letter handling.
+
+{/* DIAGRAM: buyer's browser (React) → checkout API (Node/TypeScript on AWS) → three synchronous dependencies drawn side by side: the orders datastore, the pricing/shipping resolver, and Stripe for authorisation. From the checkout API, one arrow out to an event topic (SNS), which fans out to four queues (SQS), each feeding a worker: seller notification, catalogue/inventory sync, logistics booking, analytics. Each queue shows a retry arrow looping back on itself and an arrow to a dead-letter queue. Grafana sits to one side with dotted lines reading from the API and the workers. All boxes labelled as provisioned by Terraform. */}
+
+The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 25k products synced daily, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
+
+Infrastructure is Terraform end to end — Lambda where the work is spiky and short, containers where it is long-running — so the whole thing is reproducible and reviewable in the same pipeline as the application code.
+
+{/* TODO(diogo): which datastore backs the order aggregate — PostgreSQL, DynamoDB, both? The diagram should name it. */}
+{/* TODO(diogo): SQS standard or FIFO for the order fan-out, and how did you handle ordering/idempotency for the seller notification path? */}
+
+## Key decisions
+
+**Fan-out asynchronously rather than optimising the synchronous path.** The obvious alternative was to keep the single transaction and make each step faster — parallelise the provider calls, cache aggressively, tune the queries. That would have bought a real improvement, but it keeps the buyer's latency coupled to the slowest third party on the worst day. Making the post-authorisation work asynchronous decoupled buyer-visible latency from provider availability permanently, which is a property, not a tuning result.
+
+**One payment authorisation, many seller orders.** The alternative was a payment per seller, which is simpler to reason about for payouts and refunds. It loses because a basket spanning six brands would then mean six authorisations that can partially fail, and the failure modes are all visible to the buyer as declined cards. A single authorisation with downstream splitting moves the partial-failure problem to a place we control and can retry.
+
+**Idempotency keys on every write in the money path.** The cost is real: every mutation needs a stable key and a store to check it against, and it complicates retry logic. It wins because the alternative in an at-least-once event system is duplicate orders and duplicate charges, and there is no acceptable rate of those.
+
+**Strangle the old checkout rather than cut over.** A big-bang replacement would have been faster to build and much easier to reason about. It loses on risk: there is no safe rollback from a checkout cutover that goes wrong at 9am on a Monday.
+
+{/* TODO(diogo): what actually gated the migration — a feature flag, a percentage rollout, routing by seller or by buyer cohort? This is the detail a principal reader will want. */}
+
+## Results
+
+- Checkout latency went from roughly 10 seconds to under 2.5 seconds.
+- The Stripe integration enabled 8 payment methods, with BNPL and shipping/logistics integrations built on the same foundations.
+- The Shopify catalogue sync reached roughly a 96% sync success rate, with about 99% of new seller catalogues created automatically and around 25k products synced daily.
+- Observability moved from "check the logs" to Grafana dashboards and PostHog product analytics, so latency and failure regressions surfaced before support tickets did.
+
+{/* TODO(diogo): any conversion or abandonment movement you are allowed to state publicly? If not, leave this out entirely — I have not asserted one. */}
+
+## What I'd do differently
+
+**I built the event backbone before I had the observability to debug it.** Grafana came after the async fan-out was live, which meant a period where a stuck queue looked identical to a slow provider. If I did it again, dashboards and alerting on queue depth and DLQ arrival rate would ship in the same change as the first queue, not after.
+
+**I underestimated how much of the complexity was seller-side data quality, not checkout.** A meaningful share of the failure cases traced back to inconsistent catalogue and shipping data rather than the checkout code. I treated that as an integration problem for too long instead of a data-contract problem, and the validation layer that eventually fixed it should have existed from the start.
+
+**Idempotency was retrofitted per endpoint rather than being a platform primitive.** It works, but it is enforced by convention. A shared middleware that made the un-idempotent path the hard one would have cost a week early and saved more than that in review attention since.
+
+{/* TODO(diogo): anything you genuinely regret architecturally — a boundary drawn in the wrong place, a service that should not have been split? The honest version of this section is stronger than the three above. */}

@@ -1,0 +1,89 @@
+---
+/**
+ * Surface container for projects, roles, posts and hobbies.
+ *
+ * When `href` is set the whole card becomes one link (one tab stop, no nested
+ * interactive elements) and the signature signal rule wipes across the top
+ * edge on hover/focus. Content is never hidden behind that interaction.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'default' | 'raised' | 'sunken' | 'feature';
+type Pad = 'none' | 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'div'> & HTMLAttributes<'a'>, 'href'> {
+  variant?: Variant;
+  padding?: Pad;
+  /** Present ⇒ the whole card is an anchor. */
+  href?: string | URL;
+  external?: boolean;
+  /** Render as a semantic element when not a link. */
+  as?: 'div' | 'article' | 'li' | 'section';
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  padding = 'md',
+  href,
+  external = false,
+  as = 'div',
+  class: className,
+  ...rest
+} = Astro.props;
+
+const Tag = href ? 'a' : as;
+
+const pads: Record<Pad, string> = {
+  none: '',
+  sm: 'p-4',
+  md: 'p-5 sm:p-6',
+  lg: 'p-6 sm:p-8',
+};
+
+const variants: Record<Variant, string> = {
+  default: 'bg-surface border-border-subtle',
+  raised: 'bg-surface-raised border-border-subtle shadow-raise',
+  sunken: 'bg-surface-sunken border-transparent',
+  feature: 'bg-surface-raised border-border shadow-raise',
+};
+
+const interactive = href
+  ? 'group block no-underline transition-[border-color,box-shadow,transform] duration-base ' +
+    'ease-out-expo hover:border-border hover:shadow-lift focus-visible:shadow-lift ' +
+    'motion-safe:hover:-translate-y-0.5 motion-safe:focus-visible:-translate-y-0.5'
+  : '';
+
+const externalAttrs = href && external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<Tag
+  href={href ? href.toString() : undefined}
+  class:list={[
+    'relative isolate overflow-hidden rounded-xl border',
+    variants[variant],
+    pads[padding],
+    interactive,
+    className,
+  ]}
+  {...externalAttrs}
+  {...rest}
+>
+  {
+    href && (
+      <span
+        aria-hidden="true"
+        class="signal-rule pointer-events-none absolute inset-x-0 top-0 h-[3px] scale-x-0 rounded-none opacity-0 transition-[transform,opacity] duration-base ease-out-expo group-hover:scale-x-100 group-hover:opacity-100 group-focus-visible:scale-x-100 group-focus-visible:opacity-100"
+      />
+    )
+  }
+  {
+    variant === 'feature' && !href && (
+      <span
+        aria-hidden="true"
+        class="signal-rule pointer-events-none absolute inset-x-0 top-0 h-[3px] rounded-none"
+      />
+    )
+  }
+  <slot />
+</Tag>

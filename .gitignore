@@ -146,3 +146,7 @@ vite.config.ts.timestamp-*
 # Astro generated
 .astro/
 .wrangler/
+
+# Lighthouse CI reports
+.lighthouseci
+.playwright-mcp/
