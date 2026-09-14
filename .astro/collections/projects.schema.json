@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "blurb": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string"
+    },
+    "org": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "treatment": {
+      "type": "string",
+      "enum": [
+        "deep-dive",
+        "summary"
+      ]
+    },
+    "stack": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      }
+    },
+    "featured": {
+      "default": true,
+      "type": "boolean"
+    },
+    "order": {
+      "type": "number"
+    },
+    "confidential": {
+      "default": false,
+      "type": "boolean"
+    },
+    "draft": {
+      "default": false,
+      "type": "boolean"
+    },
+    "$schema": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "blurb",
+    "role",
+    "org",
+    "period",
+    "treatment",
+    "stack",
+    "order"
+  ]
+}

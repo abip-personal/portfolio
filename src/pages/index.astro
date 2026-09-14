@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/data/site';
+---
+
+<BaseLayout>
+  <section class="mx-auto max-w-3xl px-6 py-24">
+    <h1 class="text-5xl font-bold tracking-tight text-ink">{SITE.name}</h1>
+    <p class="mt-4 text-xl text-ink-muted">{SITE.role}</p>
+    <p class="mt-2 text-ink-subtle">Foundation scaffold — sections land in Wave 2.</p>
+  </section>
+</BaseLayout>
