@@ -87,13 +87,3 @@ The platform is pre-launch, so the honest result statement is about what exists 
 - Automatic generation of the legally required digital field logbook as a by-product of normal use.
 
 {/* TODO(diogo): any pilot users, agronomists onboarded, or field testing done? Concrete pre-launch validation is worth stating and I have not assumed any. */}
-
-## What I'd do differently
-
-**I split into three services earlier than the load justified.** The shapes really are different, and I would make the same call again for chat. But the ingestion service could have started as a scheduled job inside the API and been extracted when it earned it. As a solo engineer I paid the operational cost of a third deployable long before there was traffic to justify it.
-
-**The NLP smart actions should have shipped after the logbook, not alongside it.** The logbook is the feature that makes the product legally useful. Smart actions make it pleasant. I built them close together and it slowed down proving the thing that actually matters.
-
-**Choosing TypeORM.** It is fine, and moving now would not pay for itself. But I have spent more time than I would like working around its behaviour on the spatial and migration paths specifically, and I would look harder at the alternatives before committing again.
-
-{/* TODO(diogo): is the TypeORM friction real and specific — which parts? If it's not a genuine regret, I'd rather replace this bullet with one that is. */}

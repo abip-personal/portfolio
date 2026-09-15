@@ -54,13 +54,12 @@ The core move was to stop treating checkout as one long synchronous transaction 
 
 The request path now does the minimum that must be correct-on-write: validate the basket, resolve per-seller shipping and totals, create the order aggregate, and take payment authorisation. Everything that does not have to block the buyer — seller notification, catalogue and inventory reconciliation, logistics booking, analytics — moved behind events onto queues, with retries and dead-letter handling.
 
-{/* DIAGRAM: buyer's browser (React) → checkout API (Node/TypeScript on AWS) → three synchronous dependencies drawn side by side: the orders datastore, the pricing/shipping resolver, and Stripe for authorisation. From the checkout API, one arrow out to an event topic (SNS), which fans out to four queues (SQS), each feeding a worker: seller notification, catalogue/inventory sync, logistics booking, analytics. Each queue shows a retry arrow looping back on itself and an arrow to a dead-letter queue. Grafana sits to one side with dotted lines reading from the API and the workers. All boxes labelled as provisioned by Terraform. */}
 
 The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 25k products synced daily, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
 
 Infrastructure is Terraform end to end — Lambda where the work is spiky and short, containers where it is long-running — so the whole thing is reproducible and reviewable in the same pipeline as the application code.
 
-{/* TODO(diogo): which datastore backs the order aggregate — PostgreSQL, DynamoDB, both? The diagram should name it. */}
+{/* TODO(diogo): which datastore backs the order aggregate — PostgreSQL, DynamoDB, both? */}
 {/* TODO(diogo): SQS standard or FIFO for the order fan-out, and how did you handle ordering/idempotency for the seller notification path? */}
 
 ## Key decisions

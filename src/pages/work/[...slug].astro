@@ -2,15 +2,14 @@
 /**
  * One page per non-draft project, at /work/<id>/.
  *
- * The two deep-dives get their architecture diagram injected through an `h2`
- * override on the MDX body — see `components/diagrams/*H2.astro`. The content
+ * The agriluso deep-dive gets its architecture diagram injected through an
+ * `h2` override on the MDX body — see `components/diagrams/*H2.astro`. The content
  * files themselves are untouched.
  */
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import CaseStudyLayout from '@/layouts/CaseStudyLayout.astro';
 import AgrilusoH2 from '@/components/diagrams/AgrilusoH2.astro';
-import CreoateCheckoutH2 from '@/components/diagrams/CreoateCheckoutH2.astro';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
@@ -37,8 +36,7 @@ const { project, prev, next } = Astro.props;
 const { Content } = await render(project);
 
 /** Diagram-bearing case studies, keyed by project id. */
-const diagramHeadings: Record<string, typeof CreoateCheckoutH2 | undefined> = {
-  'creoate-checkout': CreoateCheckoutH2,
+const diagramHeadings: Record<string, typeof AgrilusoH2 | undefined> = {
   agriluso: AgrilusoH2,
 };
 

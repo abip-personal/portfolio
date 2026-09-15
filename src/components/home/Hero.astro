@@ -8,7 +8,6 @@ import Container from '@/components/ui/Container.astro';
 import Button from '@/components/ui/Button.astro';
 import Badge from '@/components/ui/Badge.astro';
 import SignalRule from '@/components/ui/SignalRule.astro';
-import Email from '@/components/Email.astro';
 import { SITE } from '@/data/site';
 ---
 
@@ -49,7 +48,6 @@ import { SITE } from '@/data/site';
     <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
       <Button href="/#work" size="lg">View work</Button>
       <Button href={SITE.cvPath} variant="secondary" size="lg">Download CV</Button>
-      <Email class="text-base sm:ml-2" />
     </div>
   </Container>
 </section>

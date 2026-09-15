@@ -3,9 +3,6 @@
  * Components and the Astro config both read from here — change it in one place.
  */
 
-/** Email is stored split so the plain string never appears in the served HTML. */
-export const EMAIL_PARTS = ['ferreira.dfr', 'gmail.com'] as const;
-
 export const SITE = {
   url: 'https://diogoferreira.dev',
   name: 'Diogo Ferreira',
