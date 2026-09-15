@@ -1,23 +1,27 @@
 ---
 title: "Homelab"
-blurb: "Self-hosted infrastructure at home: somewhere to run things properly, and somewhere to break things safely."
+blurb: "The self-hosted side: a home stack I run on purpose — services split by concern, local AI models, and its own auth and observability layer."
 glyph: "🖥️"
 tags:
   - "Self-hosting"
   - "Infrastructure"
-  - "Docker"
+  - "Local AI"
   - "Homelab"
 order: 2
 ---
 
-A homelab is the cheapest way I know to keep infrastructure instincts sharp. Work gives you a cloud account with guardrails on it; a machine at home gives you the failure modes that the guardrails normally hide — the disk that fills, the certificate that expires, the container that comes back in the wrong order after a power cut.
+A homelab is the cheapest way I know to keep infrastructure instincts sharp. Work gives me a cloud account with guardrails on it; a machine at home gives me the failure modes those guardrails normally hide — the disk that fills, the certificate that expires, the container that comes back in the wrong order after a power cut.
 
-It also makes ideas from work cheap to test. Running self-hosted LLMs via Ollama is something I do at work, where it gave the team a local option for cases where sending code to a third party was not the right default; the instinct to reach for a self-hosted version of a thing first comes from the same place.
+The shape: a Proxmox host running LXC guests, one per concern — a core guest, an AI guest, a media guest, and so on, with containers doing the work inside them. Splitting by concern isn't ceremony. It means I can break and rebuild the AI stack without touching the services the house actually depends on, and the blast radius of any bad change stays inside one guest.
 
-{/* TODO(diogo): what's the hardware — a NAS, mini PCs, a repurposed desktop, a rack? Don't want to invent a parts list. */}
-{/* TODO(diogo): what's actually self-hosted on it, and which of those services do other people in the house depend on? */}
-{/* TODO(diogo): how is it orchestrated — plain Docker Compose, Proxmox, k3s, something else? */}
-{/* TODO(diogo): do you run Ollama or any local models at home, or is that only a work thing? I've deliberately only claimed the work usage. */}
-{/* TODO(diogo): what monitoring is on it — Grafana/Prometheus like at work, or something lighter? */}
-{/* TODO(diogo): backups: what's the strategy, and have you ever had to actually restore from one? */}
-{/* TODO(diogo): what's the worst thing that has gone wrong, and what did fixing it teach you? */}
+The AI guest is the part that maps most directly to work: **Ollama** for the local models, **Open WebUI** as the interface, **Qdrant** for vector storage, and **SearXNG** for search — with a discrete GPU passed through into the container that runs the models. Running self-hosted LLMs via Ollama is something I do professionally too, where it gave the team a local option for the cases where sending code to a third party was the wrong default. The instinct to reach for a self-hosted version of a thing first is built here, where the cost of experimenting is a reboot instead of an approval.
+
+There was also an auth piece worth building rather than assuming. A small forward-auth service sits in front of the user-facing OAuth flow and validates machine-to-machine requests using an API key before they reach it. The pattern is the interesting part: separate the "is this a legitimate service?" question from the "who is that person?" question, and answer the first one at the edge, where it's cheapest to reject.
+
+The services the house leans on — a photo library, a media server, a self-hosted password manager, and some local DNS filtering — all run the same way, which is the whole point of self-hosting: they're mine to reason about and to operate, no third party in the loop for the basics. Getting to that point is easier said than done. There's no vendor to call, so "it works" has to mean something I can actually verify — the underlying box is a finite resource I have to keep backed up and keep powered.
+
+That discipline is the strongest thread back to the day job. Not the boxes — the habits they force: keep things isolated enough to break safely, put credential checks at the edge, and treat "I can see what it's doing" as a requirement of "it runs." None of that is specific to a machine at home.
+
+{/* TODO(diogo): what's the physical form factor of the host — a tower, a mini, a small rack? I don't want to invent hardware you may not own. */}
+{/* TODO(diogo): monitoring — is there a full Prometheus + Grafana stack running, or the model's metrics exporter plus a log viewer for now? Want to be precise about what's actually there. */}
+{/* TODO(diogo): backups — the strategy, and have you ever had to actually restore from one? A restore story is worth gold. */}

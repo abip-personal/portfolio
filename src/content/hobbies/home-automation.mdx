@@ -1,22 +1,31 @@
 ---
 title: "Home automation & IoT"
-blurb: "End-to-end projects outside work spanning hardware, software and automation — the part of the job you don't get to do at work."
+blurb: "The physical side: a radio, a message bus, and the automation logic that ties a house together — plus a solar and battery setup built to keep the power on."
 glyph: "🏠"
 tags:
   - "Home automation"
   - "IoT"
-  - "3D printing"
+  - "Solar & energy"
   - "Hardware"
 order: 1
 ---
 
-Most of my working life is spent above the hardware line. At home I build things that cross it: sensors, controllers, and the automation logic that ties them together, plus 3D printing for the parts that need to physically exist.
+Most of my working life is spent above the hardware line. At home I build across it: the sensors, the radio, the logic that ties them together, and the things they actually switch.
 
-The appeal is that these projects are end to end in a way commercial work rarely is. One person owns the enclosure, the firmware, the network, the integration and the thing it is supposed to actually do — and every shortcut you take in one of those layers comes back at you in another.
+I don't run a single "smart home" app I can't reach into. I run a stack I can:
 
-{/* TODO(diogo): what actually runs the automation — Home Assistant, Node-RED, ESPHome, something you wrote? */}
-{/* TODO(diogo): which controllers and protocols are in play — ESP32, Zigbee, Z-Wave, Matter, plain MQTT over wifi? */}
-{/* TODO(diogo): what's the single project you're proudest of here, and what problem did it actually solve day to day? */}
-{/* TODO(diogo): what have you 3D printed for these builds — enclosures, mounts, something more interesting? */}
-{/* TODO(diogo): what broke, and how did you find it? A failure story is the most useful thing on this page. */}
-{/* TODO(diogo): anything here that changed how you think about reliability or observability at work? That's the link worth drawing. */}
+- **Home Assistant** as the hub — where every device, integration and automation lives, and where I actually write the automations.
+- **Node-RED** for the flows I want to read, test and rearrange — the glue between devices and rules, without burying that logic in a config file.
+- **A Zigbee radio over an MQTT broker**, with the broker as the bus. Devices don't talk to the hub through some closed cloud; they publish to a plain, local message bus that Home Assistant and Node-RED both subscribe to.
+
+That last bit is the point. A motion sensor, the garage gate, the lighting, the climate system and the solar telemetry all share one vocabulary, and none of it has to reach out to a third party to do anything. When the gate's contact flips, that's just a state change on the bus that a flow can act on — no round trip to the internet in between.
+
+The solar setup is where that thinking gets its most honest test. Panels, a battery bank (a 16 kWh one) and a generator sit behind the grid and an inverter, with two automatic transfer switches so the house keeps running when any single source drops — the inverter out, the grid out, whichever it is. The inverter's telemetry and the utility metering feed straight into the dashboard, so the automation layer can see how the house is actually powered and act on it, rather than pretending it's always on the grid.
+
+The trade-off I accept deliberately: a stack I own is fully mine to operate. There is no vendor ticket and no support line — when it breaks, I *am* the failure domain, and I design for that. I picked a mature radio I can drive over a plain bus over a shinier standard, because it's the one I can still reason about when something is wrong at a bad time.
+
+That loop comes straight back to work. Measure what I build, route it through a bus I control, and design for the source dropping rather than the happy path. The tools change; the instinct that reliability has to be designed in, not assumed, is the same one.
+
+{/* TODO(diogo): I've led with the solar + battery resilience build as the centrepiece. Is that actually the one you're proudest of, or is there another you'd rather lead with? */}
+{/* TODO(diogo): what have you 3D printed for these builds — enclosures, mounts, a sensor housing? Only want to keep it if it's real. */}
+{/* TODO(diogo): one failure story — something that broke and how you found it. Even one concrete one would make this page land. */}

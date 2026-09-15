@@ -21,11 +21,14 @@ export const SOCIALS = [
   { label: 'LinkedIn', href: 'https://linkedin.com/in/ferreiradfr' },
 ] as const;
 
-/** Nav entries. `/blog` is filtered out at render time while the collection is empty. */
+/**
+ * Nav entries. Section links are absolute (`/#...`) so they work from every
+ * page; `/blog/` is filtered out at render time while the collection is empty.
+ */
 export const NAV = [
-  { label: 'Work', href: '/#work' },
+  { label: 'Work', href: '/work/' },
   { label: 'Experience', href: '/#experience' },
   { label: 'Off the clock', href: '/#hobbies' },
-  { label: 'Writing', href: '/blog' },
+  { label: 'Writing', href: '/blog/' },
   { label: 'Contact', href: '/#contact' },
 ] as const;
