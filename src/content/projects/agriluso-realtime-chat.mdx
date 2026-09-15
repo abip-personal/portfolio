@@ -1,0 +1,73 @@
+---
+title: "Real-time chat that survives horizontal scaling: TTL-based presence and per-room push suppression in Redis"
+blurb: "A standalone Socket.io chat service where presence and 'looking at this room' state live in Redis with short TTLs, so the system stays correct when messages and sockets land on different instances."
+role: "Founder & Engineer"
+org: "Agriluso"
+period: "In active development, pre-launch"
+treatment: "deep-dive"
+stack:
+  - "NestJS"
+  - "TypeScript"
+  - "Socket.io"
+  - "Redis"
+  - "PostgreSQL"
+  - "TypeORM"
+  - "JWT"
+metrics: []
+featured: true
+order: 5
+confidential: false
+draft: false
+---
+
+## Context
+
+Agriluso's core loop is a conversation: a farmer with a problem reaches an agronomist in real time. For that loop to survive beyond a single process, the chat had to stop being a feature of the API — `agriluso-chat` is a separate NestJS service sharing the domain package with the others.
+
+The design question is not "how do I add websockets". It is what happens the day the service runs as more than one instance, because that is the day most chat implementations quietly stop being correct.
+
+## Constraints
+
+- **The service must be horizontally scalable.** Long-lived connections do not scale out within one process. If I add an instance, any shared state that assumes "I own this user's connection" is wrong.
+- **Presence cannot depend on clean disconnects.** Crashed clients and dropped connections are a fact of life, not an edge case — and a user who looks permanently "online" to their agronomist is a user the agronomist stops messaging.
+- **Push notifications are the fallback channel.** When the real-time connection does not deliver (or does not reach a user who is not actually looking), the push notification is what gets the message to a person. Suppressing the wrong ones, or suppressing too many, both hurt.
+- **State must live outside process memory.** Anything used to answer "is that user online and where" must be readable from whichever instance is handling the current event.
+
+## Architecture
+
+The transport is Socket.io with `@socket.io/redis-adapter`. The adapter wires the websocket layer to Redis pub/sub, so a message emitted on instance A reaches sockets attached to instance B. This is what makes the instance count a deployment detail rather than a correctness detail: any instance can serve any connected client for routing purposes.
+
+Presence is stored in Redis, deliberately TTL-based:
+
+- `presence:<userId>` is set with a 30-second TTL, refreshed while the client is connected.
+- `active_room:<userId>` is set with a 40-second TTL — the presence TTL plus ten.
+
+When a member of a room receives a new message, the `push` module walks the room's members, excluding the sender, and for each one decides:
+
+- No push if the member has the room **muted**, or has a `mutedUntil` that is still in the future.
+- No push if the member is online **and** their `active_room` is this exact room — they are looking at it right now.
+- Otherwise, send a push carrying `roomId` and `messageId`.
+
+## Key decisions
+
+**TTLs as the presence source of truth, not connect/disconnect events.** Tracking explicit join and leave events is simpler, and it works perfectly — right up until the first unclean disconnect, where it is wrong and stays wrong: every crashed client and dropped connection leaves an entry that says "online" forever. With a TTL, a dead client ages out of existence on its own, in seconds, with no cleanup code and no reconciliation. The cost is that "online" means "seen within the last 30 seconds" rather than a perfectly accurate signal. I would pay that trade because it removes the whole class of code I would otherwise have to keep correct on every path — every refresh, every leave, every crash.
+
+**A 40-second `active_room` TTL, deliberately longer than the 30-second presence TTL.** `active_room` is consulted only after the online check passes. If it could expire first, I could get "active room says X, but presence is gone" and make a wrong decision in the gaps. One TTL longer than the other makes that window impossible to hit, for the cost of ten seconds of stale room attribution.
+
+**"Connected" and "looking at this conversation" are different facts.** A user can hold an open socket while on another screen. They are online. Checking only `isOnline` and skipping the push because they are "connected" silently swallows a notification they genuinely needed — the socket does not know where their eyes are. Suppressing only when `active_room` names this exact room is what keeps the fallback channel honest.
+
+**All of it in Redis, not in process memory.** The socket for a given user may be attached to instance B while instance A handles the incoming message. If presence or active-room state lived in the memory of whichever instance last saw a client, the check "is member X looking at this room" would answer correctly on one instance and incorrectly on the next. In Redis, the answer is the same no matter which instance is asking, and the short TTLs mean no instance can hold on to a wrong "yes".
+
+**"Muted" and `mutedUntil` are two checks, not one state.** Collapsing them into one boolean would force a write to re-enable delivery; a timestamp simply passes, and nobody has to remember to flip anything back.
+
+## Results
+
+This is pre-launch, so the honest result statement is about what exists and behaves correctly, not about traction:
+
+- A standalone `agriluso-chat` service (gateway, messages, rooms, contacts, push modules) with JWT auth via passport and winston logging, sharing a domain package with the other services.
+- Socket.io with the Redis adapter, so connected clients and message handling can sit on different instances without losing reachability.
+- TTL-based presence in Redis (30s) and a per-user active-room key (40s), so an unclean disconnect resolves itself rather than sticking around.
+- Push suppression that is correct under horizontal scaling: it distinguishes room-level mute, timed quiet, online-but-not-looking-at-this-room, and looking-at-this-room exactly.
+
+{/* TODO(diogo): which push provider does the push module deliver through, and how is the messageId used on open — deep-link to that message, scroll, or just mark as read? */}
+{/* TODO(diogo): is the rooms membership (who is in a room) read from PostgreSQL per message, or cached in Redis — that affects how the suppression loop's cost scales with room size. */}
