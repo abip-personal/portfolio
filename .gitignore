@@ -154,3 +154,4 @@ vite.config.ts.timestamp-*
 # Audit artifacts (regenerate with npm run lighthouse / the audit sweep)
 audit/screenshots/
 .lighthouseci/
+audit/styles/
