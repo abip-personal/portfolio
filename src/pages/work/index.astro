@@ -68,14 +68,13 @@ const summaries = projects.filter((p) => p.data.treatment !== 'deep-dive');
               {project.data.metrics.length > 0 && (
                 <dl class="mt-6 flex flex-wrap gap-x-8 gap-y-4">
                   {project.data.metrics.map((metric) => (
-                    <div>
-                      <dt class="sr-only">{metric.label}</dt>
+                    <div class="flex flex-col-reverse">
+                      <dt class="mt-1 text-xs font-semibold tracking-wide text-ink uppercase">
+                        {metric.label}
+                      </dt>
                       <dd class="text-stat-sm font-extrabold tabular-nums text-gradient">
                         {metric.value}
                       </dd>
-                      <p class="mt-1 text-xs font-semibold tracking-wide text-ink uppercase">
-                        {metric.label}
-                      </p>
                     </div>
                   ))}
                 </dl>

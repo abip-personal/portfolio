@@ -150,3 +150,7 @@ vite.config.ts.timestamp-*
 # Lighthouse CI reports
 .lighthouseci
 .playwright-mcp/
+
+# Audit artifacts (regenerate with npm run lighthouse / the audit sweep)
+audit/screenshots/
+.lighthouseci/

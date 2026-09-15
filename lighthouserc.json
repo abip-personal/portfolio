@@ -2,6 +2,16 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
+      "url": [
+        "http://localhost:0/",
+        "http://localhost:0/blog/",
+        "http://localhost:0/styleguide/",
+        "http://localhost:0/work/",
+        "http://localhost:0/work/creoate-checkout/",
+        "http://localhost:0/work/agriluso/",
+        "http://localhost:0/work/ai-assisted-engineering/",
+        "http://localhost:0/work/regulated-gaming/"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",

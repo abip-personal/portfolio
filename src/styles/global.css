@@ -281,6 +281,13 @@
     -moz-osx-font-smoothing: grayscale;
     /* Belt and braces against horizontal scroll from any full-bleed graphic. */
     overflow-x: clip;
+    /*
+     * Sticky footer: on short pages (e.g. /blog/ with no posts) the footer
+     * would otherwise sit mid-viewport with a dead band of surface below it.
+     */
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
   }
 
   /* Visible focus for keyboard users on every interactive element. */
@@ -310,7 +317,18 @@
   }
 }
 
+/* Let the content area absorb the slack so the footer sits at the bottom. */
+body > main {
+  flex: 1 0 auto;
+}
+
 /* Skip link: visually hidden until focused. */
+/* The focus target itself must not draw a full-page outline. */
+#main:focus,
+#main:focus-visible {
+  outline: none;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;

@@ -51,7 +51,7 @@ const { title, description, image, type, noindex } = Astro.props;
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot name="header" />
-    <main id="main">
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <slot name="footer" />
