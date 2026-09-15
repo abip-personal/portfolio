@@ -19,7 +19,8 @@ const metric = z.object({
 
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
+  schema: ({ image }) =>
+    z.object({
     title: z.string(),
     /** Short line under the title on the card. */
     blurb: z.string(),
@@ -36,7 +37,14 @@ const projects = defineCollection({
     /** True when the work belongs to an employer and copy must stay within public claims. */
     confidential: z.boolean().default(false),
     draft: z.boolean().default(false),
-  }),
+    /** Optional lead image, resolved and optimised by astro:assets. */
+    heroImage: image().optional(),
+    heroImageAlt: z.string().optional(),
+    /** Optional screenshot gallery. Every entry needs real alt text. */
+    gallery: z
+      .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
+      .default([]),
+    }),
 });
 
 const experience = defineCollection({
@@ -58,14 +66,21 @@ const experience = defineCollection({
 
 const hobbies = defineCollection({
   loader: glob({ base: './src/content/hobbies', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
-    title: z.string(),
-    blurb: z.string(),
-    /** Emoji or short glyph used as the card's visual anchor. */
-    glyph: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    order: z.number(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      blurb: z.string(),
+      /** Emoji or short glyph used as the card's visual anchor. */
+      glyph: z.string().optional(),
+      tags: z.array(z.string()).default([]),
+      order: z.number(),
+      /** Optional lead image, resolved and optimised by astro:assets. */
+      heroImage: image().optional(),
+      heroImageAlt: z.string().optional(),
+      gallery: z
+        .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
+        .default([]),
+    }),
 });
 
 const posts = defineCollection({
