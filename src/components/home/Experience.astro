@@ -1,0 +1,99 @@
+---
+/**
+ * Career timeline, newest first. Roles marked `expanded` carry their
+ * highlights; everything older collapses to a single scannable line.
+ */
+import { getCollection } from 'astro:content';
+import Container from '@/components/ui/Container.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+
+const roles = (await getCollection('experience')).sort((a, b) =>
+  b.data.startDate.localeCompare(a.data.startDate)
+);
+---
+
+<section class="scroll-mt-24">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      id="experience"
+      eyebrow="Experience"
+      title="Eighteen years, four industries"
+      description="Marketplace payments, automotive OTA, regulated gaming, and government-funded healthcare R&D — production systems in every one of them."
+    />
+
+    <ol class="mt-10 space-y-8 border-l-2 border-border-subtle pl-6 sm:pl-8">
+      {
+        roles.map((role) => (
+          <li class="relative">
+            <span
+              aria-hidden="true"
+              class="signal-rule absolute top-2 -left-[calc(1.5rem+1px)] h-[4px] w-4 -translate-x-1/2 sm:-left-[calc(2rem+1px)]"
+            />
+
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+              <h3
+                class:list={[
+                  'font-bold text-balance text-ink',
+                  role.data.expanded ? 'text-2xl' : 'text-lg',
+                ]}
+              >
+                {role.data.title}
+                <span class="text-accent"> · {role.data.org}</span>
+              </h3>
+              <p class="shrink-0 text-sm font-semibold tracking-wide text-ink-subtle sm:text-right">
+                {role.data.period}
+              </p>
+            </div>
+
+            <p class="mt-1 text-sm text-ink-subtle">{role.data.location}</p>
+
+            {role.data.expanded && (
+              <>
+                {role.data.summary && (
+                  <p class="mt-4 max-w-2xl text-pretty text-ink-muted">{role.data.summary}</p>
+                )}
+                {role.data.highlights.length > 0 && (
+                  <ul class="mt-4 max-w-3xl space-y-2.5">
+                    {role.data.highlights.map((highlight) => (
+                      <li class="relative pl-5 text-pretty text-ink-muted">
+                        <span
+                          aria-hidden="true"
+                          class="signal-rule absolute top-[0.6em] left-0 size-2 rounded-[2px]"
+                        />
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {role.data.stack.length > 0 && (
+                  <ul class="mt-5 flex flex-wrap gap-2">
+                    {role.data.stack.map((item) => (
+                      <li>
+                        <Badge variant="outline">{item}</Badge>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+
+    <dl class="mt-12 grid gap-6 border-t border-border-subtle pt-8 sm:grid-cols-2">
+      <div>
+        <dt class="text-2xs font-bold tracking-[0.18em] text-ink-subtle uppercase">Education</dt>
+        <dd class="mt-2 text-pretty text-ink-muted">
+          <span class="font-semibold text-ink">Instituto Politécnico de Leiria</span> — Bologna
+          Degree, Information Technologies Applied to Healthcare (2005–2008)
+        </dd>
+      </div>
+      <div>
+        <dt class="text-2xs font-bold tracking-[0.18em] text-ink-subtle uppercase">Languages</dt>
+        <dd class="mt-2 text-ink-muted">Portuguese (native), English (C2)</dd>
+      </div>
+    </dl>
+  </Container>
+</section>

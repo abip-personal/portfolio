@@ -1,0 +1,150 @@
+---
+/**
+ * The 20-minute read. A case study leads with who did what and the numbers
+ * that prove it, then gives the argument in full at a comfortable measure,
+ * then hands the reader somewhere to go next.
+ */
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import ProjectMeta from '@/components/ProjectMeta.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Container from '@/components/ui/Container.astro';
+import Prose from '@/components/ui/Prose.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+import Stat from '@/components/ui/Stat.astro';
+
+type Project = CollectionEntry<'projects'>;
+
+interface Props {
+  project: Project;
+  prev?: Project;
+  next?: Project;
+}
+
+const { project, prev, next } = Astro.props;
+const { title, blurb, role, org, period, stack, metrics, treatment, confidential } = project.data;
+
+const eyebrow = treatment === 'deep-dive' ? 'Case study' : 'Selected work';
+const metricColumns =
+  metrics.length >= 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : metrics.length === 2 ? 'sm:grid-cols-2' : '';
+---
+
+<BaseLayout
+  title={title}
+  description={blurb}
+  image={`/og/projects/${project.id}.png`}
+  type="article"
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <article>
+    <Container size="content" as="header" class="pt-10 pb-8 sm:pt-14">
+      <a
+        href="/work/"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-ink-muted no-underline hover:text-accent"
+      >
+        <span aria-hidden="true">←</span> All work
+      </a>
+
+      <p class="mt-8 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+        <SignalRule length="1.75rem" thickness="3px" />
+        {eyebrow}
+      </p>
+
+      <h1 class="mt-4 max-w-4xl text-4xl font-extrabold text-balance text-ink">{title}</h1>
+      <p class="mt-5 max-w-3xl text-lg text-pretty text-ink-muted sm:text-xl">{blurb}</p>
+
+      <ProjectMeta role={role} org={org} period={period} class="mt-8" />
+
+      <h2 class="sr-only">Stack</h2>
+      <ul class="mt-6 flex flex-wrap gap-2" aria-label="Technologies used">
+        {stack.map((item) => <li><Badge variant="neutral">{item}</Badge></li>)}
+      </ul>
+
+      {
+        confidential && (
+          <p class="mt-6 max-w-2xl text-sm text-ink-subtle">
+            Employer work. Everything here stays inside what can be said publicly.
+          </p>
+        )
+      }
+    </Container>
+
+    {
+      metrics.length > 0 && (
+        <section
+          aria-labelledby="results-heading"
+          class="blueprint-grid border-y border-border-subtle bg-surface-raised py-10 sm:py-12"
+        >
+          <Container size="content">
+            <h2
+              id="results-heading"
+              class="text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase"
+            >
+              The numbers
+            </h2>
+            <div class:list={['mt-8 grid gap-8', metricColumns]}>
+              {metrics.map((m) => (
+                <Stat value={m.value} label={m.label} detail={m.detail} size="sm" />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )
+    }
+
+    <Container size="content" class="py-12 sm:py-16">
+      <Prose size="lg" class="mx-auto max-w-[64ch]">
+        <slot />
+      </Prose>
+    </Container>
+  </article>
+
+  {
+    (prev || next) && (
+      <Container size="content" as="nav" aria-labelledby="more-work-heading" class="pb-4">
+        <h2 id="more-work-heading" class="text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+          More work
+        </h2>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+          {[
+            { entry: prev, direction: 'Previous' },
+            { entry: next, direction: 'Next' },
+          ]
+            .filter((item): item is { entry: Project; direction: string } => Boolean(item.entry))
+            .map(({ entry, direction }) => (
+              <li>
+                <Card href={`/work/${entry.id}/`} padding="md" class="h-full">
+                  <p class="text-xs font-bold tracking-[0.14em] text-ink-subtle uppercase">
+                    {direction}
+                  </p>
+                  <p class="mt-2 text-lg font-bold text-pretty text-ink group-hover:text-accent">
+                    {entry.data.title}
+                  </p>
+                  <p class="mt-2 text-sm text-ink-muted">{entry.data.org}</p>
+                </Card>
+              </li>
+            ))}
+        </ul>
+      </Container>
+    )
+  }
+
+  <Container size="content" class="py-12 sm:py-16">
+    <Card variant="feature" padding="lg">
+      <h2 class="text-3xl font-extrabold text-balance text-ink">Want the parts I left out?</h2>
+      <p class="mt-4 max-w-xl text-lg text-pretty text-ink-muted">
+        Happy to walk through the trade-offs, the failure modes, or anything above in more detail.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href="/#contact">Get in touch</Button>
+        <Button href="/work/" variant="secondary">See all work</Button>
+      </div>
+    </Card>
+  </Container>
+</BaseLayout>

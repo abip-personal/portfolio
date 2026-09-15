@@ -1,0 +1,68 @@
+---
+/**
+ * Shared chrome for an architecture diagram.
+ *
+ * Each diagram ships two drawings of the same system — a landscape one for
+ * wide viewports and a stacked one for phones — because scaling a landscape
+ * diagram down to 320px makes its labels illegible. Only one is in the layout
+ * (and therefore in the accessibility tree) at a time.
+ *
+ * The `alternative` list is the real text alternative: it states the
+ * architecture, so a screen-reader user gets the same information a sighted
+ * reader gets, not the word "diagram".
+ */
+interface Props {
+  /** Visible caption under the drawing. */
+  caption: string;
+  /** Ordered prose statements that together describe the architecture. */
+  alternative: string[];
+  /** Accessible heading for the text alternative. */
+  altHeading?: string;
+  class?: string;
+}
+
+const { caption, alternative, altHeading = 'Architecture, described', class: className } = Astro.props;
+---
+
+<figure class:list={['my-9', className]}>
+  <div class="hidden overflow-x-auto md:block">
+    <slot name="wide" />
+  </div>
+  <div class="overflow-x-auto md:hidden">
+    <slot name="narrow" />
+  </div>
+  <figcaption>{caption}</figcaption>
+  <div class="sr-only">
+    <p>{altHeading}:</p>
+    <ol>
+      {alternative.map((line) => <li>{line}</li>)}
+    </ol>
+  </div>
+</figure>
+
+<style>
+  figure :global(svg) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    font-family: var(--font-sans);
+  }
+</style>
+
+<style>
+  /*
+   * The prose column is set to a 65–75 character measure, which is narrower
+   * than the landscape drawing needs to stay legible. From md up the figure
+   * breaks out of that column, centred on it, capped so it can never cause a
+   * horizontal scrollbar.
+   */
+  @media (min-width: 768px) {
+    figure {
+      width: min(720px, calc(100vw - 2.5rem));
+      max-width: none;
+      margin-inline-start: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>

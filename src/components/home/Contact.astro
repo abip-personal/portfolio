@@ -1,0 +1,43 @@
+---
+/**
+ * One clear ask, three ways to act on it.
+ */
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import Email from '@/components/Email.astro';
+import { SITE, SOCIALS } from '@/data/site';
+
+const linkedin = SOCIALS.find((social) => social.label === 'LinkedIn');
+---
+
+<section class="blueprint-grid scroll-mt-24">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      id="contact"
+      eyebrow="Contact"
+      title="Looking for a full-remote Principal or Staff role"
+      description="If you are hiring for one and any of the above looks like the shape of problem your team has, I would like to hear about it. I read everything and I reply."
+    />
+
+    <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+      <Email as="button" size="lg" label="Email me" />
+      {linkedin && (
+        <Button href={linkedin.href} variant="secondary" size="lg" external>
+          LinkedIn
+        </Button>
+      )}
+      <Button href={SITE.cvPath} variant="secondary" size="lg">Download CV</Button>
+    </div>
+
+    <p class="mt-8 text-ink-muted">
+      Or write to <Email /> directly.
+    </p>
+
+    <ul class="mt-6 flex flex-wrap items-center gap-2.5">
+      <li><Badge variant="accent" size="md" dot>{SITE.availability}</Badge></li>
+      <li><Badge variant="outline" size="md">Based in {SITE.location}</Badge></li>
+    </ul>
+  </Container>
+</section>

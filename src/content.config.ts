@@ -71,7 +71,10 @@ const hobbies = defineCollection({
 const posts = defineCollection({
   loader: glob({
     base: './src/content/posts',
-    // Leading-underscore files (e.g. _template.mdx) are ignored by the glob loader.
+    // NOTE: leading-underscore files are NOT excluded by the glob loader in
+    // Astro 7 - _template.mdx IS loaded into this collection. It carries
+    // draft: true, so every consumer MUST filter explicitly:
+    //   getCollection('posts', ({ data }) => !data.draft)
     pattern: '**/*.{md,mdx}',
   }),
   schema: z.object({

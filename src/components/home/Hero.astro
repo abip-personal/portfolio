@@ -1,0 +1,55 @@
+---
+/**
+ * The 30-second pitch. Name, role, what he actually does, where he is, what he
+ * is looking for, and three ways to act on it — all above the fold, all plain
+ * text. The boldness is entirely type, colour and the signal rule.
+ */
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+import Email from '@/components/Email.astro';
+import { SITE } from '@/data/site';
+---
+
+<section class="blueprint-grid relative border-b border-border-subtle">
+  <Container size="wide" class="py-16 sm:py-24 lg:py-28">
+    <p
+      class="flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase"
+    >
+      <SignalRule length="1.75rem" thickness="3px" animate />
+      {SITE.tagline}
+    </p>
+
+    <h1 class="mt-5 text-display font-extrabold text-balance text-ink">
+      Diogo <span class="text-gradient">Ferreira</span>
+    </h1>
+
+    <div class="mt-6 max-w-3xl">
+      <SignalRule length="7rem" thickness="6px" animate />
+      <p class="mt-6 text-2xl font-bold text-balance text-ink">
+        {SITE.role} — 18 years shipping production systems end to end.
+      </p>
+      <p class="mt-4 text-lg text-pretty text-ink-muted">
+        Payment and checkout infrastructure, regulated platforms audited by certification bodies,
+        and cloud-native architecture on AWS. Hands-on from the data model to the deploy pipeline,
+        and accountable for what it does in production.
+      </p>
+    </div>
+
+    <ul class="mt-8 flex flex-wrap items-center gap-2.5">
+      <li>
+        <Badge variant="accent" size="md" dot>{SITE.availability}</Badge>
+      </li>
+      <li>
+        <Badge variant="outline" size="md">{SITE.location}</Badge>
+      </li>
+    </ul>
+
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+      <Button href="/#work" size="lg">View work</Button>
+      <Button href={SITE.cvPath} variant="secondary" size="lg">Download CV</Button>
+      <Email class="text-base sm:ml-2" />
+    </div>
+  </Container>
+</section>

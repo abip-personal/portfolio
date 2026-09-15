@@ -1,0 +1,78 @@
+---
+/**
+ * Obfuscated email.
+ *
+ * The assembled address never appears in the served HTML: the two halves are
+ * rendered separately (with a visible `[at]`) and joined client-side.
+ *
+ * No-JS fallback:
+ *   - `as="link"`  → readable plain text, "ferreira.dfr [at] gmail.com".
+ *   - `as="button"` → a real button-styled link to #contact, where that plain
+ *     text address is shown. Nothing is ever empty or broken.
+ */
+import Button from '@/components/ui/Button.astro';
+import { EMAIL_PARTS } from '@/data/site';
+
+interface Props {
+  /** 'link' renders inline text; 'button' renders the primary CTA. */
+  as?: 'link' | 'button';
+  /** Visible label for the button form. */
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { as = 'link', label = 'Email me', size = 'md', class: className } = Astro.props;
+const [user, domain] = EMAIL_PARTS;
+---
+
+{
+  as === 'button' ? (
+    <Button
+      variant="primary"
+      size={size}
+      href="/#contact"
+      class={className}
+      data-email-cta
+      data-email-user={user}
+      data-email-domain={domain}
+    >
+      {label}
+    </Button>
+  ) : (
+    <span
+      class:list={[
+        'inline-flex flex-wrap items-baseline gap-x-1 font-semibold break-words text-accent',
+        className,
+      ]}
+      data-email-text
+      data-email-user={user}
+      data-email-domain={domain}
+    >
+      <span data-email-label>
+        {user} [at] {domain}
+      </span>
+    </span>
+  )
+}
+
+<script is:inline>
+  // Joins the halves at runtime, so crawlers only ever see "user [at] domain".
+  (() => {
+    const join = (el) => `mailto:${el.dataset.emailUser}@${el.dataset.emailDomain}`;
+
+    for (const el of document.querySelectorAll('[data-email-cta]')) {
+      el.setAttribute('href', join(el));
+    }
+
+    for (const el of document.querySelectorAll('[data-email-text]')) {
+      const href = join(el);
+      const link = document.createElement('a');
+      link.href = href;
+      link.textContent = href.slice('mailto:'.length);
+      link.className = 'underline decoration-2 underline-offset-4 hover:text-accent-strong';
+      const label = el.querySelector('[data-email-label]');
+      if (label) label.replaceWith(link);
+    }
+  })();
+</script>

@@ -1,0 +1,22 @@
+---
+/**
+ * `h2` override passed to the Creoate checkout case study's MDX body.
+ *
+ * The content files are frozen and MDX comments never reach the DOM, so the
+ * drawing described by the DIAGRAM marker in the body is placed from here
+ * instead: this override renders the heading exactly as the markdown pipeline
+ * would, and drops the diagram in directly under the "Architecture" heading.
+ * No content file is touched, and renaming that heading would only lose the
+ * diagram — it could never break the page.
+ */
+import CreoateCheckoutDiagram from './CreoateCheckoutDiagram.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id } = Astro.props;
+---
+
+<h2 id={id}><slot /></h2>
+{id === 'architecture' && <CreoateCheckoutDiagram />}

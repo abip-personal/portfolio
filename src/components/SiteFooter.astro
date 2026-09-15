@@ -1,0 +1,53 @@
+---
+import Container from '@/components/ui/Container.astro';
+import { SITE, SOCIALS } from '@/data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border-subtle bg-surface-raised">
+  <Container
+    size="wide"
+    class="flex flex-col items-start gap-6 py-10 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <div>
+      <p class="flex items-center gap-2.5 text-sm font-bold text-ink">
+        <span
+          aria-hidden="true"
+          class="signal-rule h-4 w-[4px] shrink-0 rounded-full"
+          data-orientation="vertical"></span>
+        {SITE.name}
+      </p>
+      <p class="mt-2 text-sm text-ink-subtle">
+        &copy; {year} {SITE.name}. {SITE.location}.
+      </p>
+    </div>
+
+    <nav aria-label="Elsewhere">
+      <ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        {
+          SOCIALS.map((social) => (
+            <li>
+              <a
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm font-semibold text-ink-muted underline decoration-2 underline-offset-4 transition-colors duration-fast hover:text-accent"
+              >
+                {social.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a
+            href={SITE.cvPath}
+            class="text-sm font-semibold text-ink-muted underline decoration-2 underline-offset-4 transition-colors duration-fast hover:text-accent"
+          >
+            CV (PDF)
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </Container>
+</footer>

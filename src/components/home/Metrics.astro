@@ -1,0 +1,63 @@
+---
+/**
+ * The metrics band — four numbers a recruiter can read without scrolling past
+ * the fold twice. Every figure comes from the projects' `metrics` frontmatter
+ * or the CV; three of the four link to the work that backs them.
+ */
+import Container from '@/components/ui/Container.astro';
+import Card from '@/components/ui/Card.astro';
+import Stat from '@/components/ui/Stat.astro';
+
+const stats = [
+  {
+    value: '~10s → <2.5s',
+    label: 'Checkout latency',
+    detail: 'Rebuilt the flow and the marketplace infrastructure under it.',
+    href: '/work/creoate-checkout/',
+  },
+  {
+    value: '~25k',
+    label: 'Products synced daily',
+    detail: 'Shopify seller-catalogue sync, ~96% success rate.',
+    href: '/work/creoate-checkout/',
+  },
+  {
+    value: '100%',
+    label: 'AI-assisted adoption',
+    detail: 'Every engineer in the org, inside twelve months.',
+    href: '/work/ai-assisted-engineering/',
+  },
+  {
+    value: '18',
+    label: 'Years shipping',
+    detail: 'Payments, regulated gaming, healthcare, automotive.',
+    href: undefined,
+  },
+];
+---
+
+<section id="metrics" class="border-b border-border-subtle bg-surface-sunken">
+  <Container size="wide" class="py-14 sm:py-20">
+    <h2 class="sr-only">Results at a glance</h2>
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        stats.map((stat) =>
+          stat.href ? (
+            <li>
+              <Card href={stat.href} variant="raised" padding="lg" class="h-full">
+                <Stat value={stat.value} label={stat.label} detail={stat.detail} size="sm" />
+                <p class="mt-4 text-sm font-semibold text-accent">See the work →</p>
+              </Card>
+            </li>
+          ) : (
+            <li>
+              <Card as="div" variant="raised" padding="lg" class="h-full">
+                <Stat value={stat.value} label={stat.label} detail={stat.detail} size="sm" />
+              </Card>
+            </li>
+          )
+        )
+      }
+    </ul>
+  </Container>
+</section>

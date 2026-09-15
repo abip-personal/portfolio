@@ -1,0 +1,98 @@
+---
+/**
+ * Tag archive. With an empty posts collection this correctly generates zero
+ * routes — the draft filter matters, because _template.mdx is loaded by the
+ * glob loader despite its leading underscore.
+ */
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import TagList from '@/components/TagList.astro';
+import Card from '@/components/ui/Card.astro';
+import Container from '@/components/ui/Container.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+import { tagSlug } from '@/components/tag-utils';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+
+  const byTag = new Map<string, { label: string; posts: CollectionEntry<'posts'>[] }>();
+
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      const slug = tagSlug(tag);
+      const bucket = byTag.get(slug) ?? { label: tag, posts: [] };
+      bucket.posts.push(post);
+      byTag.set(slug, bucket);
+    }
+  }
+
+  return [...byTag.entries()].map(([slug, { label, posts: tagged }]) => ({
+    params: { tag: slug },
+    props: {
+      label,
+      posts: tagged.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }));
+}
+
+interface Props {
+  label: string;
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { label, posts } = Astro.props;
+
+const dateFormat: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+---
+
+<BaseLayout title={`Tagged “${label}”`} description={`Writing tagged ${label}.`}>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <Container size="content" as="header" class="pt-12 pb-10 sm:pt-16">
+    <a
+      href="/blog/"
+      class="inline-flex items-center gap-2 text-sm font-semibold text-ink-muted no-underline hover:text-accent"
+    >
+      <span aria-hidden="true">&larr;</span> All writing
+    </a>
+    <p
+      class="mt-8 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase"
+    >
+      <SignalRule length="1.75rem" thickness="3px" />
+      Tag
+    </p>
+    <h1 class="mt-4 text-4xl font-extrabold text-balance text-ink">#{label}</h1>
+    <p class="mt-5 text-ink-muted">
+      {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+    </p>
+  </Container>
+
+  <Container size="content" as="section" class="pb-16">
+    <ul class="grid gap-6 sm:grid-cols-2">
+      {
+        posts.map((post) => (
+          <li>
+            <Card href={`/blog/${post.id}/`} variant="raised" padding="lg" class="h-full">
+              <time
+                datetime={post.data.pubDate.toISOString()}
+                class="text-xs font-bold tracking-[0.14em] text-ink-subtle uppercase"
+              >
+                {post.data.pubDate.toLocaleDateString('en-GB', dateFormat)}
+              </time>
+              <h2 class="mt-3 text-xl font-bold text-balance text-ink">{post.data.title}</h2>
+              <p class="mt-3 text-pretty text-ink-muted">{post.data.description}</p>
+              <TagList tags={post.data.tags} linked={false} class="mt-5" />
+            </Card>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+</BaseLayout>

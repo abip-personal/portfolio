@@ -29,10 +29,6 @@ const SKIP_PAGES = new Set([]);
 
 const KNOWN_PENDING = new Set([
   '/diogo-ferreira-cv.pdf', // public/ CV asset not committed yet (SITE.cvPath)
-  '/#work',                 // home-page sections not built yet
-  '/#experience',
-  '/#hobbies',
-  '/#contact',
 ]);
 
 /** @param {string} dir @returns {Promise<string[]>} */

@@ -1,0 +1,283 @@
+---
+/**
+ * Checkout rebuild: a short synchronous, correct-on-write request path plus an
+ * asynchronous fan-out for everything that must not block the buyer.
+ *
+ * Two drawings of the same system — landscape for wide viewports, stacked for
+ * phones. Colours come from the theme tokens, never from literal hexes.
+ */
+import DiagramFigure from './DiagramFigure.astro';
+import { box, defs, edge, note, retryLoop } from './svg';
+
+/* ------------------------------------------------------------------ *
+ * Wide (landscape) drawing — 720 × 584.
+ * ------------------------------------------------------------------ */
+const W = 'cc-w';
+
+const wideRows = [
+  {
+    y: 178,
+    queue: 'seller-notify',
+    title: ['Seller notification'],
+    sub: 'email + seller dashboard',
+  },
+  {
+    y: 254,
+    queue: 'catalogue-sync',
+    title: ['Catalogue &', 'inventory sync'],
+    sub: 'Shopify · ~25k products/day',
+  },
+  { y: 330, queue: 'logistics', title: ['Logistics booking'], sub: 'carrier & courier APIs' },
+  { y: 406, queue: 'analytics', title: ['Analytics'], sub: 'PostHog · Grafana metrics' },
+];
+
+const wide = [
+  defs(W),
+
+  /* Request path -------------------------------------------------- */
+  box({ x: 60, y: 6, w: 180, h: 44, title: "Buyer's browser", sub: 'React' }),
+  edge('M 150 50 V 80', { ns: W }),
+  box({
+    x: 20,
+    y: 86,
+    w: 260,
+    h: 56,
+    tone: 'accent',
+    title: 'Checkout API',
+    sub: 'Node · TypeScript · AWS',
+  }),
+  note(20, 168, 'Synchronous — correct on write', { size: 10, weight: 700, uppercase: true }),
+
+  box({
+    x: 50,
+    y: 182,
+    w: 230,
+    h: 44,
+    title: 'Orders datastore',
+    sub: 'order aggregate · idempotency keys',
+  }),
+  box({
+    x: 50,
+    y: 238,
+    w: 230,
+    h: 44,
+    title: 'Pricing & shipping resolver',
+    sub: 'per-seller totals, rules, MOV',
+  }),
+  box({
+    x: 50,
+    y: 294,
+    w: 230,
+    h: 44,
+    tone: 'ghost',
+    dashed: true,
+    title: 'Stripe — authorisation',
+    sub: 'third party · one auth per basket',
+  }),
+  edge('M 35 142 V 204 H 45', { ns: W }),
+  edge('M 35 142 V 260 H 45', { ns: W }),
+  edge('M 35 142 V 316 H 45', { ns: W }),
+
+  /* Async fan-out -------------------------------------------------- */
+  note(330, 74, 'Asynchronous — must not block the buyer', {
+    size: 10,
+    weight: 700,
+    uppercase: true,
+  }),
+  edge('M 280 108 H 326', { ns: W }),
+  note(303, 100, 'event', { size: 10, anchor: 'middle' }),
+  box({
+    x: 330,
+    y: 86,
+    w: 382,
+    h: 48,
+    tone: 'signal',
+    title: 'SNS topic — order.authorised',
+    sub: 'fan-out · at-least-once delivery',
+  }),
+
+  ...wideRows.flatMap((row) => [
+    edge(`M 396 134 V 148 H 312 V ${row.y + 25} H 327`, { ns: W }),
+    box({
+      x: 330,
+      y: row.y,
+      w: 132,
+      h: 50,
+      tone: 'signal',
+      title: 'SQS queue',
+      sub: row.queue,
+      size: 12,
+    }),
+    retryLoop(396, row.y, W, 12),
+    edge(`M 462 ${row.y + 25} H 482`, { ns: W }),
+    box({
+      x: 486,
+      y: row.y,
+      w: 150,
+      h: 50,
+      title: row.title,
+      sub: row.sub,
+      size: 12,
+    }),
+    edge(`M 396 ${row.y + 50} V ${row.y + 63} H 682`, { ns: W, dashed: true }),
+    box({
+      x: 660,
+      y: row.y + 10,
+      w: 52,
+      h: 30,
+      tone: 'ghost',
+      dashed: true,
+      title: 'DLQ',
+      size: 11,
+    }),
+  ]),
+
+  /* Observability --------------------------------------------------- */
+  edge('M 280 126 H 292 V 497 H 326', { ns: W, faint: true }),
+  edge('M 561 456 V 474', { ns: W, faint: true }),
+  box({
+    x: 330,
+    y: 478,
+    w: 382,
+    h: 46,
+    title: 'Grafana + PostHog',
+    sub: 'queue depth · DLQ arrival rate · checkout latency',
+    size: 12,
+  }),
+
+  note(8, 552, '↻  retry with backoff   ·   DLQ  dead-letter queue   ·   dotted  observability', {
+    size: 10.5,
+    lines: [
+      'All infrastructure in Terraform — Lambda where the work is spiky, containers where it is long-running.',
+    ],
+  }),
+].join('');
+
+/* ------------------------------------------------------------------ *
+ * Narrow (stacked) drawing — 340 × 800.
+ * ------------------------------------------------------------------ */
+const N = 'cc-n';
+
+const narrowRows = [
+  { y: 380, title: ['Seller notification'], sub: 'email + dashboard' },
+  { y: 456, title: ['Catalogue &', 'inventory sync'], sub: '~25k products/day' },
+  { y: 532, title: ['Logistics booking'], sub: 'carrier APIs' },
+  { y: 608, title: ['Analytics'], sub: 'PostHog' },
+];
+
+const narrow = [
+  defs(N),
+
+  box({ x: 20, y: 6, w: 300, h: 44, title: "Buyer's browser", sub: 'React' }),
+  edge('M 170 50 V 66', { ns: N }),
+  box({
+    x: 20,
+    y: 70,
+    w: 300,
+    h: 52,
+    tone: 'accent',
+    title: 'Checkout API',
+    sub: 'Node · TypeScript · AWS',
+  }),
+  note(20, 142, 'Synchronous — correct on write', { size: 10, weight: 700, uppercase: true }),
+
+  box({ x: 32, y: 152, w: 288, h: 42, title: 'Orders datastore', sub: 'idempotency keys', size: 12 }),
+  box({
+    x: 32,
+    y: 202,
+    w: 288,
+    h: 42,
+    title: 'Pricing & shipping resolver',
+    sub: 'per-seller totals',
+    size: 12,
+  }),
+  box({
+    x: 32,
+    y: 252,
+    w: 288,
+    h: 42,
+    tone: 'ghost',
+    dashed: true,
+    title: 'Stripe — authorisation',
+    sub: 'third party',
+    size: 12,
+  }),
+  edge('M 24 122 V 173 H 27', { ns: N }),
+  edge('M 24 122 V 223 H 27', { ns: N }),
+  edge('M 24 122 V 273 H 27', { ns: N }),
+
+  note(20, 308, 'Asynchronous — after authorisation', { size: 10, weight: 700, uppercase: true }),
+  box({
+    x: 20,
+    y: 318,
+    w: 300,
+    h: 48,
+    tone: 'signal',
+    title: 'SNS topic — order.authorised',
+    sub: 'fan-out · at-least-once',
+    size: 12,
+  }),
+
+  ...narrowRows.flatMap((row) => [
+    edge(`M 8 366 V ${row.y + 27} H 16`, { ns: N }),
+    box({
+      x: 20,
+      y: row.y,
+      w: 110,
+      h: 54,
+      tone: 'signal',
+      title: 'SQS queue',
+      sub: ['retry ↻', 'then DLQ'],
+      size: 12,
+    }),
+    retryLoop(75, row.y, N, 11),
+    edge(`M 130 ${row.y + 27} H 142`, { ns: N }),
+    box({ x: 146, y: row.y, w: 174, h: 54, title: row.title, sub: row.sub, size: 12 }),
+  ]),
+
+  edge('M 170 662 V 680', { ns: N, faint: true }),
+  box({
+    x: 20,
+    y: 684,
+    w: 300,
+    h: 50,
+    title: 'Grafana + PostHog',
+    sub: ['queue depth · DLQ arrivals', 'checkout latency'],
+    size: 12,
+  }),
+  note(20, 760, 'All infrastructure in Terraform — Lambda where the', {
+    size: 10.5,
+    lines: ['work is spiky, containers where it is long-running.'],
+  }),
+].join('');
+
+const alternative = [
+  "The buyer's browser (React) sends one checkout request to the Checkout API, written in TypeScript on Node and running on AWS.",
+  'The API does only the work that must be correct on write, synchronously: it writes the order aggregate to the orders datastore using idempotency keys, resolves per-seller totals and shipping rules through the pricing and shipping resolver, and takes a single payment authorisation from Stripe for the whole basket.',
+  'The API then publishes one order.authorised event to an SNS topic, which fans out at-least-once to four SQS queues.',
+  'Each queue feeds one worker: seller notification, Shopify catalogue and inventory sync (about 25,000 products a day), logistics booking against carrier APIs, and analytics.',
+  'Every queue retries with backoff and sends messages it cannot process to a dead-letter queue.',
+  'Grafana and PostHog read from the API and the workers to chart queue depth, dead-letter arrival rate and checkout latency.',
+  'All of this infrastructure is provisioned with Terraform: Lambda where the work is spiky and short, containers where it is long-running.',
+];
+---
+
+<DiagramFigure
+  caption="Checkout after the rebuild: a short synchronous path that must be correct on write, and an event fan-out for everything else."
+  alternative={alternative}
+>
+  <svg
+    slot="wide"
+    viewBox="0 0 720 584"
+    role="img"
+    aria-labelledby="cc-wide-title cc-wide-desc"
+    set:html={`<title id="cc-wide-title">Creoate checkout architecture</title><desc id="cc-wide-desc">A synchronous checkout request path into an SNS topic that fans out to four SQS queues and their workers. The full description follows the diagram.</desc>${wide}`}
+  />
+  <svg
+    slot="narrow"
+    viewBox="0 0 340 800"
+    role="img"
+    aria-labelledby="cc-narrow-title cc-narrow-desc"
+    set:html={`<title id="cc-narrow-title">Creoate checkout architecture</title><desc id="cc-narrow-desc">A synchronous checkout request path into an SNS topic that fans out to four SQS queues and their workers. The full description follows the diagram.</desc>${narrow}`}
+  />
+</DiagramFigure>

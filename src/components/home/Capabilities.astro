@@ -1,0 +1,108 @@
+---
+/**
+ * Core competencies, taken from the CV and grouped so the list is scannable
+ * rather than a tag soup: each group gets a heading and a one-line framing,
+ * then short atomic chips underneath.
+ */
+import Container from '@/components/ui/Container.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+
+const groups: Array<{ title: string; summary: string; items: string[] }> = [
+  {
+    title: 'Languages, frameworks & data',
+    summary: 'Full-stack TypeScript and Java, with relational and NoSQL stores behind it.',
+    items: [
+      'TypeScript',
+      'Node.js',
+      'React',
+      'React Native',
+      'Java',
+      'PostgreSQL',
+      'MySQL',
+      'MongoDB',
+      'Redis',
+      'DynamoDB',
+    ],
+  },
+  {
+    title: 'Cloud & DevOps',
+    summary: 'AWS infrastructure owned as code, and a pipeline that ships several times a day.',
+    items: [
+      'AWS',
+      'Lambda',
+      'Terraform',
+      'Docker',
+      'GitLab CI',
+      'GitHub Actions',
+      'SQS / SNS',
+    ],
+  },
+  {
+    title: 'Engineering practices',
+    summary: 'API design, automated testing, observability, and AI-assisted engineering.',
+    items: [
+      'REST',
+      'GraphQL',
+      'Jest',
+      'Cypress',
+      'Grafana',
+      'Prometheus',
+      'Datadog',
+      'PostHog',
+      'Claude',
+      'Ollama',
+    ],
+  },
+  {
+    title: 'Technical leadership',
+    summary: 'The half of the job that is not code — and the half that compounds.',
+    items: [
+      'System design',
+      'Architecture ownership',
+      'Engineering mentorship',
+      'Technical interviewing',
+      'Cross-team collaboration',
+    ],
+  },
+];
+---
+
+<section class="border-y border-border-subtle bg-surface-raised">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      id="capabilities"
+      eyebrow="Capabilities"
+      title="What I bring to the table"
+      description="Deep full-stack range, with the cloud and delivery practice underneath it — and the leadership habits that make the rest of a team faster."
+    />
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-2">
+      {
+        groups.map((group) => (
+          <Card variant="default" padding="lg" as="article" class="h-full">
+            <h3 class="flex items-start gap-3 text-xl font-bold text-ink">
+              <span
+                aria-hidden="true"
+                class="signal-rule mt-1.5 h-5 w-[4px] shrink-0 rounded-full"
+                data-orientation="vertical"
+              />
+              <span class="min-w-0">{group.title}</span>
+            </h3>
+            <p class="mt-3 text-pretty text-ink-muted">{group.summary}</p>
+            <ul class="mt-5 flex flex-wrap gap-2">
+              {group.items.map((item) => (
+                <li>
+                  <Badge variant="outline" size="md">
+                    {item}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ))
+      }
+    </div>
+  </Container>
+</section>
