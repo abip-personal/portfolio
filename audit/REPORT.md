@@ -57,7 +57,7 @@ Checked on `/` and `/work/creoate-checkout/` with headless Chromium (Playwright 
 
 ### Tab order (both routes)
 - Checked, no defects: **skip link is the first tab stop** on both routes (`<a.skip-link>` "Skip to content", ring rendered: `2px solid rgb(14, 76, 143)`).
-- Order on `/`: skip link → wordmark → nav (Work, Experience, Off the clock, Contact) → theme toggle → hero CTAs → email → project cards (×5) → summary links (×2) → contact/footer links (Email me, LinkedIn, Download CV, email, LinkedIn, CV (PDF)) → cycles back to body. No hidden or unreachable interactive elements; all stops are labelled links.
+- Order on `/`: skip link → wordmark → nav (Work, Experience, Off the clock, Contact) → theme toggle → hero CTAs (View work, Download CV) → project cards (×4) → summary links (×2) → contact/footer links (Connect on LinkedIn, Download CV, LinkedIn, CV (PDF)) → cycles back to body. No hidden or unreachable interactive elements; all stops are labelled links. (SOCIALS carries LinkedIn only — there is no mailto/email tab stop anywhere on the page.)
 - Order on `/work/creoate-checkout/`: skip link → wordmark → nav → theme toggle → "← All work" → "Next: Agriluso" → "Get in touch" → "See all work" → footer (LinkedIn, CV (PDF)) → cycles back to body.
 - Checked, no defects: a visible focus ring (2px solid accent outline) is rendered on **every** tab stop on both routes (measured via computed `outline-style: solid` at each stop).
 
@@ -95,7 +95,7 @@ the screenshots themselves had already been captured).
   `/work/creoate-checkout/` at 360 and 1280 in both themes: 345/360 and 1265/1280.
 - Dark theme renders correctly across all five routes: surfaces, borders and the
   gradient treatments all resolve, no unstyled or transparent regions.
-- The mobile architecture diagram on `/work/creoate-checkout/` is legible at 360px
+- The mobile architecture diagram on `/work/agriluso/` is legible at 360px
   (it is a separate portrait variant, not the wide desktop diagram scaled down).
 - No text overlap, clipped containers, or orphaned headings observed.
 

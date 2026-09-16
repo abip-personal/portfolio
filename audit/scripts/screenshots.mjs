@@ -1,8 +1,10 @@
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const BASE = 'http://localhost:4331';
 const OUT = new URL('../screenshots', import.meta.url);
+const OUT_PATH = fileURLToPath(OUT);
 mkdirSync(OUT, { recursive: true });
 const ROUTES = [
   ['home', '/'],
@@ -23,7 +25,7 @@ for (const [slug, route] of ROUTES) {
       await page.goto(BASE + route, { waitUntil: 'networkidle' });
       await page.evaluate((t) => { document.documentElement.dataset.theme = t; }, theme);
       await page.waitForTimeout(250);
-      await page.screenshot({ path: `file://${OUT}${slug}-${width}-${theme}.png`, fullPage: true });
+      await page.screenshot({ path: `${OUT_PATH}${slug}-${width}-${theme}.png`, fullPage: true });
     }
   }
   await ctx.close();

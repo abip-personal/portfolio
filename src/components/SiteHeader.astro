@@ -11,7 +11,6 @@
 import { getCollection } from 'astro:content';
 import Container from '@/components/ui/Container.astro';
 import ThemeToggle from '@/components/ui/ThemeToggle.astro';
-import StyleSwitcher from '@/components/ui/StyleSwitcher.astro';
 import { NAV, SITE } from '@/data/site';
 
 const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -74,7 +73,6 @@ function isActive(href: string): boolean {
         </ul>
       </nav>
 
-      <StyleSwitcher />
       <ThemeToggle />
 
       <!-- Mobile disclosure -->

@@ -73,7 +73,7 @@ const SCAN = () => {
     for (let n = el; n && n instanceof Element; n = n.parentElement) {
       const b = getComputedStyle(n).backgroundColor;
       const p = parse(b);
-      if (p.length >= 4 && p[3] > 0) bg = over(rgba(b), bg);
+      if (p.length === 3 || (p.length >= 4 && p[3] > 0)) bg = over(rgba(b), bg);
     }
     const key = cs.color + '|' + bg.map(Math.round).join() + '|' + (el.textContent || '').trim().slice(0, 15);
     if (seen.has(key)) continue; seen.add(key);

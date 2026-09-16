@@ -2,7 +2,4 @@
 User-agent: *
 Allow: /
 
-# Build artefacts that are linked from meta tags, not meant to be crawled as pages.
-Disallow: /og/
-
 Sitemap: https://diogoferreira.dev/sitemap-index.xml

@@ -8,7 +8,12 @@ import { SITE } from './src/data/site.ts';
 
 export default defineConfig({
   site: SITE.url,
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => !page.includes('/styleguide'),
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },
