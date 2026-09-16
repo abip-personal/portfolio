@@ -1,0 +1,72 @@
+---
+/**
+ * A single written piece. Posts are prose first: a clear title, the date it was
+ * written, its tags, and then the argument at a comfortable measure.
+ */
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import TagList from '@/components/TagList.astro';
+import Container from '@/components/ui/Container.astro';
+import Prose from '@/components/ui/Prose.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+
+interface Props {
+  post: CollectionEntry<'posts'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = post.data;
+
+const dateFormat: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+const published = pubDate.toLocaleDateString('en-GB', dateFormat);
+const updated = updatedDate?.toLocaleDateString('en-GB', dateFormat);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={`/og/posts/${post.id}.png`}
+  type="article"
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <article>
+    <Container size="content" as="header" class="pt-10 pb-8 sm:pt-14">
+      <a
+        href="/blog/"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-ink-muted no-underline hover:text-accent"
+      >
+        <span aria-hidden="true">&larr;</span> Back to writing
+      </a>
+
+      <p class="mt-8 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+        <SignalRule length="1.75rem" thickness="3px" />
+        Writing
+      </p>
+
+      <h1 class="mt-4 text-4xl font-extrabold text-balance text-ink">{title}</h1>
+
+      <p class="mt-5 max-w-2xl text-lg text-pretty text-ink-muted">{description}</p>
+
+      <p class="mt-6 text-sm text-ink-subtle">
+        <time datetime={pubDate.toISOString()}>{published}</time>
+        {updated && <> &middot; updated <time datetime={updatedDate!.toISOString()}>{updated}</time></>}
+      </p>
+
+      <TagList tags={tags} class="mt-5" />
+    </Container>
+
+    <Container size="prose" class="pb-16">
+      <Prose>
+        <slot />
+      </Prose>
+    </Container>
+  </article>
+</BaseLayout>

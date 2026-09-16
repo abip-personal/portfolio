@@ -1,0 +1,24 @@
+---
+/**
+ * Typographic wrapper for MDX bodies.
+ *
+ * @tailwindcss/typography is NOT installed — the element styles live in
+ * `.prose` in global.css, because Astro's scoped styles cannot reach content
+ * slotted in from an MDX render.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  size?: 'base' | 'lg';
+  /** Drop the built-in reading-width cap (when the parent already sets one). */
+  full?: boolean;
+  as?: 'div' | 'article' | 'section';
+  class?: string;
+}
+
+const { size = 'base', full = false, as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['prose', size === 'lg' && 'prose-lg', full && 'max-w-none', className]} {...rest}>
+  <slot />
+</Tag>

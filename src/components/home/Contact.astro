@@ -1,0 +1,44 @@
+---
+/**
+ * One clear ask, two ways to act on it: connect on LinkedIn, or take the CV.
+ */
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import Badge from '@/components/ui/Badge.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import { SITE, SOCIALS } from '@/data/site';
+
+const linkedin = SOCIALS.find((social) => social.label === 'LinkedIn');
+---
+
+<section class="blueprint-grid scroll-mt-24">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      id="contact"
+      eyebrow="Contact"
+      title="Looking for a full-remote Principal or Staff role"
+      description="If you are hiring for one and any of the above looks like the shape of problem your team has, reach out on LinkedIn — that is the fastest way to get a hold of me, and I reply to everything that comes across my desk."
+    />
+
+    <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+      {linkedin && (
+        <Button href={linkedin.href} size="lg" external>
+          Connect on LinkedIn
+        </Button>
+      )}
+      <Button href={SITE.cvPath} variant="secondary" size="lg">
+        Download CV
+      </Button>
+    </div>
+
+    <p class="mt-8 text-ink-muted">
+      Prefer to skim the paper trail first? The CV walks through the last few roles
+      and the systems behind them — read it, then say hello on LinkedIn.
+    </p>
+
+    <ul class="mt-6 flex flex-wrap items-center gap-2.5">
+      <li><Badge variant="accent" size="md" dot>{SITE.availability}</Badge></li>
+      <li><Badge variant="outline" size="md">Based in {SITE.location}</Badge></li>
+    </ul>
+  </Container>
+</section>

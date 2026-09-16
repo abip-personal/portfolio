@@ -1,0 +1,47 @@
+---
+title: "Certified slot machines and a national lottery backend"
+blurb: "Four years leading gaming products: a Java engine behind GLI-certified slot machines, full hardware integration, and the backend for a lottery system built for the Chinese market."
+role: "Team Lead (previously Senior Java Developer)"
+org: "e.near"
+period: "2015 – 2020"
+treatment: "summary"
+stack:
+  - "Java"
+  - "Slot machine hardware integration"
+  - "Backend services"
+metrics:
+  - value: "GLI"
+    label: "certification owned end to end"
+  - value: "US + China"
+    label: "regulated markets shipped to"
+featured: true
+order: 4
+confidential: false
+draft: false
+---
+
+## Context
+
+I spent five and a half years at e.near in gaming, first as a senior individual contributor on the slot machine engineering team and then as team lead across multiple gaming products.
+
+Regulated gaming is a useful thing to have done early. It is one of the few commercial software environments where an external auditor reads your code and your process, and where "it works on the floor" is not sufficient evidence that it works. That changes how you write things.
+
+## What I built
+
+**The Java gaming engine.** I evolved the engine powering certified slot machine software, and engineered smaller adaptations of it for other international markets. Each market has its own rules about what a machine may do, so the engine had to absorb genuinely different regulatory behaviour without forking per jurisdiction.
+
+**Hardware integration across the full stack.** Screens, printers, and bill and coin stackers. A slot machine is an embedded system with money physically inside it: a printer that jams mid-ticket or a stacker that reports a bill it did not accept is not a UI bug, it is a discrepancy someone has to reconcile.
+
+**GLI certification, owned end to end.** Gaming Laboratories International certification for the regulated US gambling market — the process, the evidence, and the engineering changes it demanded.
+
+**Lottery backend for the Chinese market.** I designed the centralized backend services powering a national lottery system built for China.
+
+{/* TODO(diogo): which specific jurisdictions beyond the US did the engine adaptations target? "Other international markets" is vague and the specifics would be more credible. */}
+{/* TODO(diogo): what was the hardest part of GLI certification in practice — RNG evidence, source review, state-recovery-after-power-loss testing, something else? One concrete detail would carry this whole section. */}
+{/* TODO(diogo): roughly what scale was the lottery backend built for, and what were the availability requirements? Only state it if you can source it. */}
+
+## Results
+
+The engine shipped in slot machines certified by GLI for the US market, and in adapted form to other international markets. The lottery backend went into a system built for the Chinese market. I moved from senior IC to team lead across these products during that period.
+
+What I took from it is a specific habit: designing for the failure that costs money rather than the failure that looks bad. In a machine that holds cash, every state transition has to be recoverable and auditable after a power cut, and that assumption survived everything I have built since — it is the same instinct behind idempotency in a payments path.

@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Single job on purpose: astro check, the build, the link check and Lighthouse
+  # all need the same node_modules and/or the same dist/, so splitting them would
+  # cost more in setup and artifact shuffling than it saves in wall-clock time.
+  build:
+    name: Check, build, link-check, Lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check and validate content collections
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      # Verifies OG cards and the feed actually landed in dist/. These are
+      # produced by endpoints, so a silent regression would otherwise only show
+      # up as a broken social preview in production.
+      - name: Verify generated assets
+        run: |
+          set -euo pipefail
+          test -s dist/og-default.png
+          file dist/og-default.png | grep -q 'PNG image data'
+          test -s dist/rss.xml
+          python3 -c "import xml.dom.minidom, sys; xml.dom.minidom.parse('dist/rss.xml')"
+          test -f dist/_headers
+          test -f dist/robots.txt
+          test -f dist/sitemap-index.xml
+
+      - name: Check internal links
+        run: npm run lint:links
+
+      # Serves dist/ on its own static server (lighthouserc.json sets
+      # `collect.staticDistDir`), runs Lighthouse 3x and asserts the budget.
+      - name: Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          temporaryPublicStorage: false
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          if-no-files-found: ignore
+          retention-days: 7

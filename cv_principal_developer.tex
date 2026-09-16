@@ -1,0 +1,156 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% ATS-SAFE TEMPLATE NOTES
+% - pdflatex + TeX Gyre Heros (Helvetica-clone, T1-encoded):
+%   xelatex+fontspec was tested and silently rewrites plain
+%   ASCII hyphens to Unicode U+2010 in the text layer, which can
+%   break naive keyword/date-range matching in screening tools.
+%   pdflatex + T1 fontenc keeps literal "-" characters intact.
+% - No tables/multi-column tricks for entry headers: verified via
+%   `pdftotext` that a tabularx-based "title (left) / date (right)"
+%   row extracts the date BEFORE the title, scrambling reading
+%   order for parsers. Everything below is single-column, strictly
+%   linear top-to-bottom, left-to-right text.
+% - PDF metadata (title/author/subject/keywords) set via hyperref.
+% ============================================================
+
+\usepackage[top=1.15cm,bottom=1.15cm,left=2.1cm,right=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tgheros}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{123A5E}
+\definecolor{subtext}{HTML}{5A5A5A}
+\definecolor{rulegray}{HTML}{D8DCE0}
+
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true, urlcolor=accent, linkcolor=accent,
+  pdftitle={Diogo Ferreira - Principal Software Engineer - CV},
+  pdfauthor={Diogo Ferreira},
+  pdfsubject={Principal Software Engineer / Full-Stack Systems CV},
+  pdfkeywords={Principal Engineer, Principal Developer, Staff Engineer, System Design, AWS, Terraform, Docker, Node.js, TypeScript, React, React Native, Java, CI/CD, DevOps, API Design, Distributed Systems, PostgreSQL, Microservices}
+}
+\usepackage{parskip}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt plus 1pt minus 1pt}
+\pagestyle{empty}
+
+% ---------- Section styling ----------
+\titleformat{\section}
+  {\large\bfseries\color{accent}}
+  {}{0em}{}
+  [{\color{rulegray}\titlerule[0.9pt]}]
+\titlespacing{\section}{0pt}{9pt}{4pt}
+
+% ---------- Custom commands (no tables - plain linear text) ----------
+% \cventry{Job Title}{Company}{Dates}{Location}
+\newcommand{\cventry}[4]{%
+  \textbf{#1} - #2\\
+  {\small\color{subtext}\textit{#3 | #4}}\par\vspace{3pt}
+}
+
+\newcommand{\cvintro}[1]{#1\par\vspace{3pt}}
+
+\newenvironment{cvitems}{\begin{itemize}[leftmargin=1.3em,itemsep=3pt,topsep=4pt,parsep=0pt]}{\end{itemize}}
+
+\newcommand{\cvstack}[1]{{\small\color{subtext}\textit{Stack: #1}}\par}
+
+\newcommand{\skillrow}[2]{\textbf{\color{accent}#1:} #2\par\vspace{4pt}}
+
+% ---------- Document ----------
+\begin{document}
+
+% ----- Header -----
+\begin{center}
+  {\fontsize{24}{26}\selectfont\bfseries\color{accent} Diogo Ferreira}\\[4pt]
+  {\normalsize\color{subtext} Principal Software Engineer - Full-Stack Systems - Cloud-Native Architecture}\\[5pt]
+  {\small
+    \href{mailto:ferreira.dfr@gmail.com}{ferreira.dfr@gmail.com} | \href{https://linkedin.com/in/ferreiradfr}{linkedin.com/in/ferreiradfr} | Lisbon, Portugal (open to full remote)
+  }
+\end{center}
+
+% ----- Summary -----
+\section{SUMMARY}
+Hands-on Principal-level engineer with 18 years of experience designing and building production systems end to end, from checkout infrastructure processing real payment flows to a certified, regulator-audited gaming platform. Deep full-stack range: cloud-native backend and infrastructure (AWS, Node.js, TypeScript, Java, Terraform, Docker, event-driven services), modern frontend and mobile (React, React Native), and a strong DevOps/observability practice (CI/CD, Grafana, Prometheus, Datadog). Rebuilt a checkout system cutting latency from \textasciitilde{}10s to under 2.5s, and drove AI-assisted engineering adoption to 100\% of an engineering org, nearly doubling delivery velocity. Also the solo architect and builder of Agriluso, a multi-service agri-tech platform (NestJS, PostgreSQL/PostGIS, Redis, Socket.io, React Native). Seeking a full-remote Principal Engineer or Staff Engineer role.
+
+% ----- Skills -----
+\section{CORE COMPETENCIES}
+\skillrow{Languages, Frameworks \& Data}{TypeScript, Node.js, React, React Native, Java, PostgreSQL and other SQL/NoSQL databases (MySQL, MongoDB, Redis, DynamoDB)}
+\skillrow{Cloud \& DevOps}{AWS (incl. Lambda/serverless), Terraform, Docker, CI/CD (GitLab CI, GitHub Actions), event-driven services (SQS/SNS)}
+\skillrow{Engineering Practices}{API design (REST, GraphQL), automated testing (Jest, Cypress), observability (Grafana, Prometheus, Datadog, PostHog), AI-assisted engineering (Claude, self-hosted LLMs via Ollama)}
+\skillrow{Technical Leadership}{System Design, Architecture Ownership, Engineering Mentorship, Technical Interviewing, Cross-Team Technical Collaboration}
+
+% ----- Experience -----
+\section{EXPERIENCE}
+
+\cventry{Software Technical Lead}{Creoate}{January 2022 - Present}{Portugal (Remote)}
+\cvintro{Hands-on technical owner for architecture and delivery on Creoate's B2B marketplace platform, working within a team of 4-6 engineers.}
+\begin{cvitems}
+  \item Designed and built the complete rebuild of the checkout flow and underlying marketplace infrastructure, cutting checkout latency from \textasciitilde{}10s to under 2.5s
+  \item Built the Stripe integration, enabling 8 payment methods, and the Shopify integration automating seller catalogue sync - \textasciitilde{}96\% sync success rate, \textasciitilde{}99\% of new seller catalogues created automatically, averaging 25k products synced daily - plus additional BNPL and shipping/logistics integrations
+  \item Own AWS cloud infrastructure and DevOps practice, shipping several deploys a day: Terraform (IaC), Docker, serverless (Lambda), event-driven services (SQS/SNS), GitLab/GitHub CI/CD pipelines
+  \item Set up observability and product analytics with Grafana and PostHog
+  \item Drove AI-assisted engineering adoption to 100\% team usage - embedding tools like Claude into daily workflows and running self-hosted models via Ollama - lifting delivery velocity from \textasciitilde{}3.5 to \textasciitilde{}6.8, cutting change failure rate from \textasciitilde{}60\% to under 15\% over a year, and reducing median cycle time from \textasciitilde{}5 days to \textasciitilde{}1.5 days
+  \item Mentor engineers and contribute to technical interviewing and hiring; own technical roadmap and OKR planning with product and business stakeholders
+\end{cvitems}
+\cvstack{AWS, Node.js, TypeScript, React, Terraform, Docker, GitLab CI/GitHub Actions, Grafana, PostHog}
+
+\vspace{5pt}
+\cventry{Senior Software Developer}{Volkswagen Digital Solutions}{December 2020 - January 2022}{Lisbon, Portugal (Remote)}
+\begin{cvitems}
+  \item Designed and developed components of the OTA (over-the-air) update platform for Maps and GPS navigation systems on MAN trucks (Volkswagen Group / TRATON)
+  \item Worked within a large-scale automotive software environment with strict reliability and rollout requirements
+\end{cvitems}
+
+\vspace{5pt}
+\cventry{Team Lead}{e.near}{October 2016 - December 2020}{Lisbon Area, Portugal}
+\cvintro{Technical lead across multiple gaming products, from a national lottery system built for the Chinese market to slot machines certified by GLI (Gaming Laboratories International) for the US gambling market.}
+\begin{cvitems}
+  \item Designed the centralized backend services powering a lottery system built for the Chinese market
+  \item Evolved a Java-based gaming engine powering certified slot machine software, and engineered smaller adaptations of the engine for other international markets
+  \item Engineered hardware integration across the full slot machine stack: screens, printers, and bill/coin stackers
+  \item Owned the GLI certification process end to end for the regulated US gaming market
+\end{cvitems}
+
+\vspace{5pt}
+\cventry{Senior Java Developer}{e.near}{March 2015 - September 2016}{Lisbon Area, Portugal}
+\begin{cvitems}
+  \item Senior individual contributor on the slot machine engineering team, focused on core Java development before stepping into the Team Lead role
+\end{cvitems}
+
+\vspace{5pt}
+\cventry{IT Consultant \& Technical Leader}{PT Sistemas de Informação}{May 2008 - January 2015}{Lisbon, Portugal}
+\begin{cvitems}
+  \item Architect on two government-funded R\&D healthcare projects: a clinical data-mining and security platform for hospital systems, and a remote cognitive rehabilitation platform combining AI-assisted therapy exercises with remote therapist monitoring
+  \item Architected and developed a healthcare integration middleware platform used in national Electronic Health Record and digital health programs, plus several telco/M2M SaaS products (CRM, click-to-call, and ticketing systems for telecom operators)
+\end{cvitems}
+
+% ----- Founder Project -----
+\section{FOUNDER PROJECT}
+\cventry{Founder}{Agriluso (agriluso.pt)}{In active development, pre-launch}{Portugal (Remote)}
+\cvintro{Solo-architected and building a mobile/web platform connecting Portuguese farmers and agronomists in real time, from data model to deployment target.}
+\begin{cvitems}
+  \item Designed and built a multi-service system: a NestJS/PostgreSQL-PostGIS REST API, a real-time chat service (Socket.io + Redis) with NLP-based smart actions, and a data ingestion service syncing weather and phytosanitary data
+  \item Built the React Native/Expo mobile app for offline-resilient use by non-technical users
+  \item Engineered a feature that automatically generates the legally required digital field logbook, and GDPR-by-design data handling (consent, export, right to erasure)
+\end{cvitems}
+\cvstack{NestJS, TypeORM, PostgreSQL/PostGIS, Redis, Socket.io, React Native, Expo, Docker, AWS (target)}
+
+% ----- Personal Projects -----
+\section{PERSONAL PROJECTS}
+Also builds and experiments outside of work in home automation, IoT, and 3D printing - end-to-end projects spanning hardware, software, and automation.
+
+% ----- Education and Languages -----
+\section{EDUCATION AND LANGUAGES}
+\textbf{Instituto Politécnico de Leiria} - Bologna Degree, Information Technologies Applied to Healthcare (2005 - 2008)
+
+Languages: Portuguese (Native), English (C2 - Native or Bilingual Proficiency)
+
+\end{document}

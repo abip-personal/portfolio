@@ -141,3 +141,17 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+.DS_Store
+
+# Astro generated
+.astro/
+.wrangler/
+
+# Lighthouse CI reports
+.lighthouseci
+.playwright-mcp/
+
+# Audit artifacts (regenerate with npm run lighthouse / the audit sweep)
+audit/screenshots/
+.lighthouseci/
+audit/styles/

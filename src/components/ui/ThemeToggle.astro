@@ -1,0 +1,101 @@
+---
+/**
+ * Light/dark switch — the only client-side JavaScript on the site.
+ *
+ * No flash: BaseLayout's blocking inline script stamps `data-theme` on <html>
+ * before first paint, and the icon + accessible label here are swapped purely
+ * by CSS off that attribute, so the correct state is painted with the first
+ * frame and stays correct even if the script below never runs.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  class:list={[
+    'theme-toggle relative inline-flex size-10 shrink-0 items-center justify-center rounded-lg',
+    'border border-border-subtle bg-surface text-ink-muted',
+    'transition-colors duration-fast hover:border-border hover:bg-accent-soft hover:text-accent',
+    className,
+  ]}
+>
+  <svg
+    class="theme-toggle__sun size-5"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+    ></path>
+  </svg>
+  <svg
+    class="theme-toggle__moon size-5"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+  </svg>
+  <span class="theme-toggle__label-light sr-only">Switch to dark theme</span>
+  <span class="theme-toggle__label-dark sr-only">Switch to light theme</span>
+</button>
+
+<style is:global>
+  /* Light theme (default): offer dark. Icons and label swap with no JS. */
+  .theme-toggle__moon,
+  .theme-toggle__label-dark {
+    display: none;
+  }
+
+  :root[data-theme='dark'] .theme-toggle__sun,
+  :root[data-theme='dark'] .theme-toggle__label-light {
+    display: none;
+  }
+
+  :root[data-theme='dark'] .theme-toggle__moon,
+  :root[data-theme='dark'] .theme-toggle__label-dark {
+    display: inline-block;
+  }
+
+  :root[data-theme='dark'] .theme-toggle__label-dark {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>
+
+<script is:inline>
+  // Delegated + guarded so multiple toggles on one page share one listener.
+  if (!window.__themeToggleBound) {
+    window.__themeToggleBound = true;
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const button = target.closest('[data-theme-toggle]');
+      if (!button) return;
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* Storage can throw in private mode — the in-page switch still works. */
+      }
+    });
+  }
+</script>

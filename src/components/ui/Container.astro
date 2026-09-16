@@ -1,0 +1,29 @@
+---
+/**
+ * Consistent page gutter + max width. Every section should sit inside one of
+ * these — it is what guarantees the 16px+ side gutter at 360px and keeps the
+ * page from ever scrolling horizontally.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+  /** prose ≈ 44rem reading column · content ≈ 68rem · wide ≈ 82rem. */
+  size?: 'prose' | 'content' | 'wide' | 'full';
+  /** Render as a different element (section, header, footer...). */
+  as?: 'div' | 'section' | 'header' | 'footer' | 'nav' | 'article';
+  class?: string;
+}
+
+const { size = 'content', as: Tag = 'div', class: className, ...rest } = Astro.props;
+
+const widths: Record<NonNullable<Props['size']>, string> = {
+  prose: 'max-w-prose',
+  content: 'max-w-content',
+  wide: 'max-w-wide',
+  full: 'max-w-none',
+};
+---
+
+<Tag class:list={['mx-auto w-full px-5 sm:px-8', widths[size], className]} {...rest}>
+  <slot />
+</Tag>

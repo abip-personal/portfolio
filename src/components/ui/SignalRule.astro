@@ -1,0 +1,47 @@
+---
+/**
+ * THE SIGNATURE DEVICE.
+ *
+ * A hard gradient bar — deep navy → azure → cyan — that marks every important
+ * moment on the site: above a section eyebrow, under the hero line, down the
+ * spine of a Stat, across the top of a hovered Card. One CSS gradient on one
+ * empty box: no image, no script, no layout cost, and it is always adjacent to
+ * text, never behind or over it.
+ *
+ * Under `prefers-reduced-motion: reduce` the draw-in is dropped entirely and
+ * the bar simply renders at full size.
+ */
+interface Props {
+  /** Bar length. Horizontal: width. Vertical: height. Any CSS length or `full`. */
+  length?: string;
+  /** Bar thickness in CSS length. */
+  thickness?: string;
+  orientation?: 'horizontal' | 'vertical';
+  /** Animate the bar drawing itself in on load. Ignored for reduced motion. */
+  animate?: boolean;
+  class?: string;
+}
+
+const {
+  length = '4rem',
+  thickness = '4px',
+  orientation = 'horizontal',
+  animate = false,
+  class: className,
+} = Astro.props;
+
+/* `full` leaves the main-axis size unset so a flex parent can stretch the bar;
+ * an explicit 100% would need a definite parent size to resolve against. */
+const full = length === 'full';
+const style =
+  orientation === 'horizontal'
+    ? `${full ? 'align-self:stretch;width:auto;' : `width:${length};`}height:${thickness};`
+    : `${full ? 'align-self:stretch;height:auto;' : `height:${length};`}width:${thickness};`;
+---
+
+<span
+  aria-hidden="true"
+  class:list={['signal-rule', className]}
+  data-orientation={orientation}
+  data-animate={animate ? 'true' : 'false'}
+  style={style}></span>

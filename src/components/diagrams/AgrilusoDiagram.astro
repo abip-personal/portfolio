@@ -1,0 +1,276 @@
+---
+/**
+ * Agriluso: an offline-first mobile client over three services with genuinely
+ * different runtime shapes, joined by the logbook write.
+ *
+ * Two drawings of the same system — landscape for wide viewports, stacked for
+ * phones. Colours come from the theme tokens, never from literal hexes.
+ */
+import DiagramFigure from './DiagramFigure.astro';
+import { box, defs, edge, note } from './svg';
+
+/* ------------------------------------------------------------------ *
+ * Wide (landscape) drawing — 720 × 400.
+ * ------------------------------------------------------------------ */
+const W = 'ag-w';
+
+const wide = [
+  defs(W),
+
+  /* Client + offline queue ----------------------------------------- */
+  box({
+    x: 150,
+    y: 6,
+    w: 230,
+    h: 52,
+    tone: 'accent',
+    title: 'React Native + Expo app',
+    sub: 'farmer & agronomist · in the field',
+  }),
+  box({
+    x: 20,
+    y: 70,
+    w: 180,
+    h: 44,
+    tone: 'ghost',
+    dashed: true,
+    title: 'Local write queue',
+    sub: 'reconciles on reconnect',
+    size: 12,
+  }),
+  edge('M 150 32 H 118 V 92 H 196', { ns: W, dashed: true, both: true }),
+  note(20, 62, 'Offline writes', { size: 10, weight: 700, uppercase: true }),
+
+  /* External feeds -------------------------------------------------- */
+  box({ x: 480, y: 40, w: 105, h: 48, tone: 'ghost', dashed: true, title: ['Weather', 'feed'], size: 11 }),
+  box({
+    x: 595,
+    y: 40,
+    w: 105,
+    h: 48,
+    tone: 'ghost',
+    dashed: true,
+    title: ['Phytosanitary', 'feed'],
+    size: 11,
+  }),
+  edge('M 532 88 V 142', { ns: W }),
+  edge('M 647 88 V 142', { ns: W }),
+  note(470, 120, 'pulled on a schedule', { size: 10, anchor: 'end' }),
+
+  /* Services -------------------------------------------------------- */
+  edge('M 210 58 V 128 H 120 V 142', { ns: W }),
+  edge('M 300 58 V 128 H 350 V 142', { ns: W, both: true }),
+  note(126, 122, 'REST · HTTPS', { size: 10 }),
+  note(356, 122, 'websocket', { size: 10 }),
+
+  box({
+    x: 20,
+    y: 148,
+    w: 200,
+    h: 66,
+    title: 'REST API',
+    sub: ['NestJS · TypeORM', 'Docker container'],
+  }),
+  box({
+    x: 250,
+    y: 148,
+    w: 200,
+    h: 66,
+    title: 'Real-time chat',
+    sub: ['Socket.io', 'Docker container'],
+  }),
+  box({
+    x: 480,
+    y: 148,
+    w: 220,
+    h: 66,
+    title: 'Ingestion service',
+    sub: ['weather + phytosanitary', 'scheduled · Docker container'],
+  }),
+
+  /* Stores and the NLP layer ---------------------------------------- */
+  edge('M 120 214 V 248', { ns: W }),
+  edge('M 350 214 V 248', { ns: W, both: true }),
+  edge('M 450 181 H 462 V 281 H 474', { ns: W, both: true }),
+
+  box({
+    x: 20,
+    y: 252,
+    w: 200,
+    h: 58,
+    title: 'PostgreSQL + PostGIS',
+    sub: ['parcels, treatments, logbook', 'spatial indexes'],
+    size: 12,
+  }),
+  box({
+    x: 250,
+    y: 252,
+    w: 200,
+    h: 58,
+    title: 'Redis',
+    sub: ['pub/sub across instances', 'session state'],
+    size: 12,
+  }),
+  box({
+    x: 480,
+    y: 252,
+    w: 220,
+    h: 58,
+    tone: 'signal',
+    title: 'NLP smart actions',
+    sub: ['intent extracted from', 'what people already type'],
+    size: 12,
+  }),
+
+  /* The logbook write, and ingestion writing into the same model ------ */
+  edge('M 430 214 V 234 H 164 V 218', { ns: W }),
+  note(297, 246, 'confirmed smart action → logbook entry', { size: 10, anchor: 'middle' }),
+
+  edge('M 590 214 V 330 H 120 V 314', { ns: W }),
+  note(355, 344, 'normalised into the same geographic model', { size: 10, anchor: 'middle' }),
+
+  note(8, 374, 'AWS is the deployment target; each service ships as a Docker container.', {
+    size: 10.5,
+    lines: ['Dashed boxes and lines mark boundaries the platform does not control.'],
+  }),
+].join('');
+
+/* ------------------------------------------------------------------ *
+ * Narrow (stacked) drawing — 340 × 616.
+ * ------------------------------------------------------------------ */
+const N = 'ag-n';
+
+const narrow = [
+  defs(N),
+
+  box({
+    x: 20,
+    y: 6,
+    w: 300,
+    h: 52,
+    tone: 'accent',
+    title: 'React Native + Expo app',
+    sub: 'offline-first · used in the field',
+    size: 12,
+  }),
+  edge('M 170 58 V 70', { ns: N, dashed: true, both: true }),
+  box({
+    x: 60,
+    y: 74,
+    w: 260,
+    h: 44,
+    tone: 'ghost',
+    dashed: true,
+    title: 'Local write queue',
+    sub: 'reconciles on reconnect',
+    size: 12,
+  }),
+
+  note(20, 140, 'Three Docker services', { size: 10, weight: 700, uppercase: true }),
+
+  edge('M 20 32 H 8 V 178 H 14', { ns: N }),
+  box({
+    x: 20,
+    y: 152,
+    w: 300,
+    h: 52,
+    title: 'REST API',
+    sub: 'NestJS · TypeORM',
+    size: 12,
+  }),
+  edge('M 170 204 V 212', { ns: N }),
+  box({
+    x: 44,
+    y: 216,
+    w: 276,
+    h: 48,
+    title: 'PostgreSQL + PostGIS',
+    sub: 'parcels · treatments · logbook',
+    size: 12,
+  }),
+
+  edge('M 320 310 H 332 V 178 H 326', { ns: N }),
+  note(316, 278, 'confirmed action → logbook', { size: 10, anchor: 'end' }),
+
+  edge('M 20 32 H 8 V 310 H 14', { ns: N, both: true }),
+  box({
+    x: 20,
+    y: 284,
+    w: 300,
+    h: 52,
+    title: 'Real-time chat',
+    sub: 'Socket.io · websockets',
+    size: 12,
+  }),
+  edge('M 110 336 V 344', { ns: N, both: true }),
+  edge('M 250 336 V 344', { ns: N, both: true }),
+  box({ x: 44, y: 348, w: 130, h: 48, title: 'Redis', sub: ['pub/sub', 'sessions'], size: 12 }),
+  box({
+    x: 190,
+    y: 348,
+    w: 130,
+    h: 48,
+    tone: 'signal',
+    title: ['NLP smart', 'actions'],
+    size: 12,
+  }),
+
+  box({ x: 20, y: 420, w: 140, h: 44, tone: 'ghost', dashed: true, title: 'Weather feed', size: 11 }),
+  box({
+    x: 180,
+    y: 420,
+    w: 140,
+    h: 44,
+    tone: 'ghost',
+    dashed: true,
+    title: ['Phytosanitary', 'feed'],
+    size: 11,
+  }),
+  edge('M 90 464 V 486', { ns: N }),
+  edge('M 250 464 V 486', { ns: N }),
+  box({
+    x: 20,
+    y: 490,
+    w: 300,
+    h: 58,
+    title: 'Ingestion service',
+    sub: ['scheduled · Docker', '→ writes into PostgreSQL + PostGIS'],
+    size: 12,
+  }),
+
+  note(20, 580, 'AWS is the deployment target.', {
+    size: 10.5,
+    lines: ['Dashed = offline or third-party boundary.'],
+  }),
+].join('');
+
+const alternative = [
+  'A React Native and Expo app, used by farmers and agronomists in the field, holds a local write queue: writes made offline are queued on the device and reconciled when connectivity returns.',
+  'The app talks to two services directly: over HTTPS to the REST API, and over a bidirectional websocket to the real-time chat service.',
+  'The REST API (NestJS and TypeORM, in a Docker container) owns the domain — users, parcels, crops, treatments and the logbook — and stores it in PostgreSQL with PostGIS, where parcel geometry is spatially indexed.',
+  'The real-time chat service (Socket.io, in a Docker container) uses Redis for pub/sub across instances and for session state, and passes the message stream through an NLP layer that extracts actionable intent — a treatment, a product, a date — as a smart action.',
+  'A smart action confirmed in chat is written back through the REST API as a structured treatment record, which is what the legally required digital field logbook is generated from.',
+  'A third service ingests weather and phytosanitary feeds on a schedule and normalises them into the same geographic model in PostgreSQL and PostGIS.',
+  'All three services run as Docker containers, with AWS as the deployment target.',
+];
+---
+
+<DiagramFigure
+  caption="Three services with different runtime shapes, an offline-first client, and the logbook write that joins chat back to the domain."
+  alternative={alternative}
+>
+  <svg
+    slot="wide"
+    viewBox="0 0 720 400"
+    role="img"
+    aria-labelledby="ag-wide-title ag-wide-desc"
+    set:html={`<title id="ag-wide-title">Agriluso platform architecture</title><desc id="ag-wide-desc">An offline-first mobile app over a REST API, a real-time chat service and a scheduled ingestion service, sharing one geographic data model. The full description follows the diagram.</desc>${wide}`}
+  />
+  <svg
+    slot="narrow"
+    viewBox="0 0 340 616"
+    role="img"
+    aria-labelledby="ag-narrow-title ag-narrow-desc"
+    set:html={`<title id="ag-narrow-title">Agriluso platform architecture</title><desc id="ag-narrow-desc">An offline-first mobile app over a REST API, a real-time chat service and a scheduled ingestion service, sharing one geographic data model. The full description follows the diagram.</desc>${narrow}`}
+  />
+</DiagramFigure>

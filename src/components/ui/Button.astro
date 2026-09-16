@@ -1,0 +1,104 @@
+---
+/**
+ * Button / link-button.
+ *
+ * Renders an <a> when `href` is set and a <button> otherwise, so a call to
+ * action is always the right element for what it actually does.
+ * `primary` carries the brand gradient; `secondary` is a bordered surface;
+ * `ghost` is text-only for tertiary actions.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Variant = 'primary' | 'secondary' | 'ghost';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'type'> {
+  variant?: Variant;
+  size?: Size;
+  /** Present ⇒ renders an anchor. */
+  href?: string | URL;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  /** Adds target/rel and an external-link affordance. */
+  external?: boolean;
+  /** Stretch to the full width of the parent. */
+  block?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  disabled = false,
+  external = false,
+  block = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const base =
+  'group relative inline-flex items-center justify-center gap-2 rounded-lg font-semibold ' +
+  'tracking-[-0.01em] whitespace-nowrap no-underline select-none ' +
+  'transition-[transform,background-color,border-color,color,box-shadow] duration-fast ease-out ' +
+  'motion-safe:active:translate-y-px ' +
+  'disabled:pointer-events-none disabled:opacity-45 aria-disabled:pointer-events-none aria-disabled:opacity-45';
+
+const sizes: Record<Size, string> = {
+  sm: 'text-sm px-3.5 py-2',
+  md: 'text-base px-5 py-2.5',
+  lg: 'text-lg px-6 py-3.5',
+};
+
+const variants: Record<Variant, string> = {
+  primary: [
+    'text-accent-ink border border-transparent shadow-raise',
+    'bg-[image:var(--gradient-cta)] bg-[length:160%_100%] bg-left',
+    'hover:bg-right hover:shadow-lift',
+    'transition-[background-position,box-shadow,transform] duration-base',
+  ].join(' '),
+  secondary:
+    'bg-surface text-ink border border-border hover:border-accent hover:text-accent hover:bg-accent-soft',
+  ghost:
+    'bg-transparent text-ink-muted border border-transparent hover:text-accent hover:bg-accent-soft',
+};
+
+const classes = [base, sizes[size], variants[variant], block && 'w-full', className];
+
+const externalAttrs = external ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+{
+  href ? (
+    <a
+      href={disabled ? undefined : href.toString()}
+      aria-disabled={disabled ? 'true' : undefined}
+      class:list={classes}
+      {...externalAttrs}
+      {...rest}
+    >
+      <slot />
+      {external && (
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          width="13"
+          height="13"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="opacity-70 transition-transform duration-fast motion-safe:group-hover:-translate-y-px motion-safe:group-hover:translate-x-px"
+        >
+          <path d="M6 3h7v7M13 3 4 12" />
+        </svg>
+      )}
+    </a>
+  ) : (
+    <button type={type} disabled={disabled} class:list={classes} {...rest}>
+      <slot />
+    </button>
+  )
+}

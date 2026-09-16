@@ -1,0 +1,38 @@
+---
+/**
+ * Post tags as links to their archive pages. `linked={false}` renders plain
+ * badges, for contexts where no archive exists.
+ */
+import Badge from '@/components/ui/Badge.astro';
+import { tagHref } from '@/components/tag-utils';
+
+interface Props {
+  tags: readonly string[];
+  /** Accessible name for the list. */
+  label?: string;
+  linked?: boolean;
+  class?: string;
+}
+
+const { tags, label = 'Tags', linked = true, class: className } = Astro.props;
+---
+
+{
+  tags.length > 0 && (
+    <ul class:list={['flex flex-wrap items-center gap-2', className]} aria-label={label}>
+      {tags.map((tag) => (
+        <li>
+          {linked ? (
+            <a href={tagHref(tag)} class="rounded-full no-underline">
+              <Badge variant="outline" class="transition-colors hover:border-accent hover:text-accent">
+                #{tag}
+              </Badge>
+            </a>
+          ) : (
+            <Badge variant="outline">#{tag}</Badge>
+          )}
+        </li>
+      ))}
+    </ul>
+  )
+}

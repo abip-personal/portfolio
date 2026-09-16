@@ -1,0 +1,5 @@
+# https://diogoferreira.dev
+User-agent: *
+Allow: /
+
+Sitemap: https://diogoferreira.dev/sitemap-index.xml

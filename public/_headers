@@ -1,0 +1,52 @@
+# Cloudflare Pages headers. Copied verbatim to dist/_headers at build time.
+# Syntax: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  # Trade-off: 'unsafe-inline' is required in both script-src and style-src.
+  #   script-src — BaseLayout.astro runs an `is:inline` theme script in <head>
+  #     before first paint. A hash would work, but Astro does not emit CSP hashes
+  #     for `is:inline` blocks, so the hash would have to be maintained by hand
+  #     and would silently break the no-flash behaviour whenever that script is
+  #     edited. Revisit if Astro's experimental CSP support is enabled.
+  #   style-src  — `build.inlineStylesheets: 'auto'` inlines small stylesheets,
+  #     and Astro emits per-component <style> blocks.
+  # Everything else is locked down: no third-party origins, no framing, no
+  # plugins, no <base> hijacking. There is no user input and no server runtime,
+  # so the residual XSS surface is effectively nil.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+
+# Astro emits content-hashed filenames here, so they can be cached forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Build-time OG cards are stable per deploy but keep their own path, so give
+# them a long browser TTL with revalidation at the edge.
+# CORP is relaxed here so social/preview clients that render the card in a
+# browser context are not blocked by the site-wide `same-origin` policy.
+/og/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Cross-Origin-Resource-Policy: cross-origin
+
+/og-default.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Cross-Origin-Resource-Policy: cross-origin
+
+# HTML and feeds must revalidate so a new deploy is picked up immediately.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/rss.xml
+  Cache-Control: public, max-age=3600
+
+/sitemap-index.xml
+  Cache-Control: public, max-age=3600

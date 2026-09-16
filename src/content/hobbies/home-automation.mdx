@@ -1,0 +1,31 @@
+---
+title: "Home automation & IoT"
+blurb: "The physical side: a radio, a message bus, and the automation logic that ties a house together — plus a solar and battery setup built to keep the power on."
+glyph: "🏠"
+tags:
+  - "Home automation"
+  - "IoT"
+  - "Solar & energy"
+  - "Hardware"
+order: 1
+---
+
+Most of my working life is spent above the hardware line. At home I build across it: the sensors, the radio, the logic that ties them together, and the things they actually switch.
+
+I don't run a single "smart home" app I can't reach into. I run a stack I can:
+
+- **Home Assistant** as the hub — where every device, integration and automation lives, and where I actually write the automations.
+- **Node-RED** for the flows I want to read, test and rearrange — the glue between devices and rules, without burying that logic in a config file.
+- **A Zigbee radio over an MQTT broker**, with the broker as the bus. Devices don't talk to the hub through some closed cloud; they publish to a plain, local message bus that Home Assistant and Node-RED both subscribe to.
+
+That last bit is the point. A motion sensor, the garage gate, the lighting, the climate system and the solar telemetry all share one vocabulary, and none of it has to reach out to a third party to do anything. When the gate's contact flips, that's just a state change on the bus that a flow can act on — no round trip to the internet in between.
+
+The solar setup is where that thinking gets its most honest test. Panels, a battery bank (a 16 kWh one) and a generator sit behind the grid and an inverter, with two automatic transfer switches so the house keeps running when any single source drops — the inverter out, the grid out, whichever it is. The inverter's telemetry and the utility metering feed straight into the dashboard, so the automation layer can see how the house is actually powered and act on it, rather than pretending it's always on the grid.
+
+The trade-off I accept deliberately: a stack I own is fully mine to operate. There is no vendor ticket and no support line — when it breaks, I *am* the failure domain, and I design for that. I picked a mature radio I can drive over a plain bus over a shinier standard, because it's the one I can still reason about when something is wrong at a bad time.
+
+That loop comes straight back to work. Measure what I build, route it through a bus I control, and design for the source dropping rather than the happy path. The tools change; the instinct that reliability has to be designed in, not assumed, is the same one.
+
+{/* TODO(diogo): I've led with the solar + battery resilience build as the centrepiece. Is that actually the one you're proudest of, or is there another you'd rather lead with? */}
+{/* TODO(diogo): what have you 3D printed for these builds — enclosures, mounts, a sensor housing? Only want to keep it if it's real. */}
+{/* TODO(diogo): one failure story — something that broke and how you found it. Even one concrete one would make this page land. */}

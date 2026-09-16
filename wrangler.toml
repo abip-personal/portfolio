@@ -1,0 +1,9 @@
+# Cloudflare Pages project config.
+#
+# The site is 100% static (Astro `output: 'static'`), so there is no Worker
+# entrypoint, no compatibility flags and no bindings — Pages just serves `dist/`.
+# Security and cache headers live in `public/_headers`, which Astro copies to
+# `dist/_headers` at build time.
+name = "portfolio"
+compatibility_date = "2025-09-01"
+pages_build_output_dir = "dist"

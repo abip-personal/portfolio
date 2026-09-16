@@ -1,0 +1,139 @@
+---
+/**
+ * Index of everything at /work/<id>/. Deep-dives lead; the shorter pieces sit
+ * underneath so a reader skimming for architecture depth hits it first.
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const deepDives = projects.filter((p) => p.data.treatment === 'deep-dive');
+const summaries = projects.filter((p) => p.data.treatment !== 'deep-dive');
+---
+
+<BaseLayout
+  title="Work"
+  description="Case studies and selected work: payment infrastructure, a multi-service agritech platform, AI-assisted engineering adoption, and certified regulated gaming."
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <Container size="content" as="header" class="pt-12 pb-10 sm:pt-16">
+    <p class="flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+      <SignalRule length="1.75rem" thickness="3px" />
+      Selected work
+    </p>
+    <h1 class="mt-4 text-4xl font-extrabold text-balance text-ink">
+      Systems I designed, built and had to operate
+    </h1>
+    <p class="mt-5 max-w-2xl text-lg text-pretty text-ink-muted">
+      Four pieces of work, written up the way I would talk through them: the constraints that were
+      fixed before I started, what I chose, what the alternatives cost, and what I would do
+      differently.
+    </p>
+  </Container>
+
+  <Container size="content" as="section" aria-labelledby="deep-dives" class="pb-14">
+    <SectionHeading
+      id="deep-dives"
+      eyebrow="The long read"
+      title="Case studies"
+      description="Full write-ups, architecture diagrams included."
+      size="md"
+    />
+    <ul class="mt-8 grid gap-6 lg:grid-cols-2">
+      {
+        deepDives.map((project) => (
+          <li>
+            <Card href={`/work/${project.id}/`} variant="raised" padding="lg" class="h-full">
+              <p class="text-xs font-bold tracking-[0.14em] text-ink-subtle uppercase">
+                {project.data.org} · {project.data.period}
+              </p>
+              <h3 class="mt-3 text-2xl font-extrabold text-balance text-ink group-hover:text-accent">
+                {project.data.title}
+              </h3>
+              <p class="mt-3 text-pretty text-ink-muted">{project.data.blurb}</p>
+
+              {project.data.metrics.length > 0 && (
+                <dl class="mt-6 flex flex-wrap gap-x-8 gap-y-4">
+                  {project.data.metrics.map((metric) => (
+                    <div class="flex flex-col-reverse">
+                      <dt class="mt-1 text-xs font-semibold tracking-wide text-ink uppercase">
+                        {metric.label}
+                      </dt>
+                      <dd class="text-stat-sm font-extrabold tabular-nums text-gradient">
+                        {metric.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
+              <ul class="mt-6 flex flex-wrap gap-2" aria-label="Stack">
+                {project.data.stack.slice(0, 6).map((item) => (
+                  <li>
+                    <Badge variant="neutral">{item}</Badge>
+                  </li>
+                ))}
+              </ul>
+
+              <p class="mt-6 text-sm font-semibold text-accent">Read the case study →</p>
+            </Card>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+
+  <Container size="content" as="section" aria-labelledby="shorter" class="pb-14">
+    <SectionHeading
+      id="shorter"
+      eyebrow="Also worth knowing"
+      title="Shorter write-ups"
+      size="md"
+    />
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+      {
+        summaries.map((project) => (
+          <li>
+            <Card href={`/work/${project.id}/`} padding="md" class="h-full">
+              <p class="text-xs font-bold tracking-[0.14em] text-ink-subtle uppercase">
+                {project.data.org} · {project.data.period}
+              </p>
+              <h3 class="mt-3 text-lg font-bold text-pretty text-ink group-hover:text-accent">
+                {project.data.title}
+              </h3>
+              <p class="mt-2 text-sm text-pretty text-ink-muted">{project.data.blurb}</p>
+            </Card>
+          </li>
+        ))
+      }
+    </ul>
+  </Container>
+
+  <Container size="content" class="pb-16">
+    <Card variant="feature" padding="lg">
+      <h2 class="text-2xl font-extrabold text-balance text-ink">
+        Looking for a principal engineer who writes things down?
+      </h2>
+      <p class="mt-3 max-w-xl text-pretty text-ink-muted">
+        I am open to full-remote principal and staff roles.
+      </p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <Button href="/#contact">Get in touch</Button>
+        <Button href="/" variant="secondary">Back to the overview</Button>
+      </div>
+    </Card>
+  </Container>
+</BaseLayout>

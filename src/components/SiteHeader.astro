@@ -1,0 +1,166 @@
+---
+/**
+ * Sticky site header: wordmark, primary nav, theme toggle.
+ *
+ * The mobile disclosure is a native <details>/<summary>, so the nav costs zero
+ * client JavaScript and is keyboard-operable for free.
+ *
+ * `/blog/` is filtered out while no published post exists, so the nav never
+ * points at an empty room.
+ */
+import { getCollection } from 'astro:content';
+import Container from '@/components/ui/Container.astro';
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import { NAV, SITE } from '@/data/site';
+
+const posts = await getCollection('posts', ({ data }) => !data.draft);
+const nav = NAV.filter((item) => item.href !== '/blog/' || posts.length > 0);
+
+const { pathname, hash } = Astro.url;
+
+/**
+ * Route-aware active state: real routes match by pathname prefix, while the
+ * home-page section links only activate on the home page when the matching
+ * hash anchor is present.
+ */
+function isActive(href: string): boolean {
+  if (href.startsWith('/#')) {
+    const [path, anchor] = href.slice(1).split('#');
+    return pathname === (path || '/') && hash === `#${anchor}`;
+  }
+  const base = href.replace(/\/$/, '');
+  return pathname === base || pathname.startsWith(`${base}/`);
+}
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-border-subtle bg-surface/85 backdrop-blur-md supports-[backdrop-filter]:bg-surface/70"
+>
+  <Container size="wide" class="flex h-16 items-center justify-between gap-4">
+    <a
+      href="/"
+      class="group inline-flex shrink-0 items-center gap-2.5 rounded-sm text-base font-extrabold tracking-[-0.02em] text-ink no-underline sm:text-lg"
+    >
+      <span
+        aria-hidden="true"
+        class="signal-rule h-6 w-[5px] shrink-0 rounded-full"
+        data-orientation="vertical"></span>
+      <span>{SITE.name}</span>
+    </a>
+
+    <div class="flex items-center gap-2">
+      <!-- Desktop nav -->
+      <nav aria-label="Primary" class="hidden md:block">
+        <ul class="flex items-center gap-1">
+          {
+            nav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                  class:list={[
+                    'inline-block rounded-md px-3 py-2 text-sm font-semibold no-underline transition-colors duration-fast',
+                    isActive(item.href)
+                      ? 'bg-accent-soft text-accent'
+                      : 'text-ink-muted hover:bg-accent-soft hover:text-accent',
+                  ]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <ThemeToggle />
+
+      <!-- Mobile disclosure -->
+      <details class="site-nav relative md:hidden">
+        <summary
+          class="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-lg border border-border-subtle bg-surface text-ink-muted transition-colors duration-fast hover:border-border hover:bg-accent-soft hover:text-accent [&::-webkit-details-marker]:hidden"
+        >
+          <span class="sr-only">Menu</span>
+          <svg
+            class="site-nav__open size-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M3 12h18M3 18h18"></path>
+          </svg>
+          <svg
+            class="site-nav__close size-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M5 5l14 14M19 5L5 19"></path>
+          </svg>
+        </summary>
+        <nav
+          aria-label="Primary"
+          class="absolute right-0 z-50 mt-2 w-[min(15rem,calc(100vw-2.5rem))] rounded-xl border border-border-subtle bg-surface p-2 shadow-lift"
+        >
+          <ul class="flex flex-col">
+            {
+              nav.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                    class:list={[
+                      'block rounded-lg px-3 py-2.5 text-base font-semibold no-underline transition-colors duration-fast',
+                      isActive(item.href)
+                        ? 'bg-accent-soft text-accent'
+                        : 'text-ink hover:bg-accent-soft hover:text-accent',
+                    ]}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </Container>
+</header>
+
+<style>
+  .site-nav__close {
+    display: none;
+  }
+
+  .site-nav[open] .site-nav__open {
+    display: none;
+  }
+
+  .site-nav[open] .site-nav__close {
+    display: block;
+  }
+</style>
+
+<script is:inline>
+  // Close the mobile disclosure once a link inside it is followed, and on Esc.
+  (() => {
+    const nav = document.querySelector('details.site-nav');
+    if (!nav) return;
+    nav.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('nav a')) nav.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && nav.open) {
+        nav.open = false;
+        nav.querySelector('summary')?.focus();
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,68 @@
+---
+/**
+ * The standard opener for every page section: signature rule + eyebrow, a big
+ * confident title, and an optional description. `id` lands on the heading's
+ * wrapper so in-page nav anchors resolve to the right scroll position.
+ */
+import SignalRule from './SignalRule.astro';
+
+interface Props {
+  /** Short kicker above the title, e.g. "Selected work". */
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  /** Anchor target for nav links (rendered on the wrapping <header>). */
+  id?: string;
+  /** Heading level — sections use h2, sub-sections h3. */
+  as?: 'h1' | 'h2' | 'h3';
+  size?: 'md' | 'lg';
+  align?: 'start' | 'center';
+  class?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  description,
+  id,
+  as: Tag = 'h2',
+  size = 'lg',
+  align = 'start',
+  class: className,
+} = Astro.props;
+
+const titleSize = size === 'lg' ? 'text-4xl' : 'text-3xl';
+---
+
+<header
+  id={id}
+  class:list={[
+    'flex flex-col',
+    align === 'center' ? 'items-center text-center' : 'items-start',
+    className,
+  ]}
+>
+  {
+    eyebrow && (
+      <p class="mb-4 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+        <SignalRule length="1.75rem" thickness="3px" />
+        {eyebrow}
+      </p>
+    )
+  }
+  <Tag class:list={[titleSize, 'font-extrabold text-balance text-ink']}>
+    {title}
+  </Tag>
+  {
+    description && (
+      <p
+        class:list={[
+          'mt-4 max-w-2xl text-lg text-pretty text-ink-muted',
+          align === 'center' && 'mx-auto',
+        ]}
+      >
+        {description}
+      </p>
+    )
+  }
+</header>
