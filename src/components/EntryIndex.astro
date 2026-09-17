@@ -1,0 +1,104 @@
+---
+/**
+ * Full index body for one category: header block, that category's deep-dives
+ * leading, then its summaries, then the closing CTA. Every string comes from
+ * categories.ts so 'work' and 'off-the-clock' can't drift apart, and every
+ * card is an EntryCard so both categories share one look.
+ *
+ * Routes mount this inside BaseLayout; the layout, header and footer stay the
+ * route's concern.
+ */
+import type { CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
+import { categories } from '@/lib/categories';
+import Button from '@/components/ui/Button.astro';
+import Card from '@/components/ui/Card.astro';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import EntryCard from '@/components/EntryCard.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+
+interface Props {
+  category: CollectionEntry<'entries'>['data']['category'];
+}
+
+const { category: slug } = Astro.props;
+const category = categories[slug];
+
+const entries = (await getCollection('entries', ({ data }) => !data.draft))
+  .filter((entry) => entry.data.category === slug)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const deepDives = entries.filter((entry) => entry.data.treatment === 'deep-dive');
+const summaries = entries.filter((entry) => entry.data.treatment !== 'deep-dive');
+---
+
+<Container size="content" as="header" class="pt-12 pb-10 sm:pt-16">
+  <p class="flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+    <SignalRule length="1.75rem" thickness="3px" />
+    {category.index.eyebrow}
+  </p>
+  <h1 class="mt-4 text-4xl font-extrabold text-balance text-ink">{category.index.title}</h1>
+  <p class="mt-5 max-w-2xl text-lg text-pretty text-ink-muted">{category.index.intro}</p>
+</Container>
+
+{
+  deepDives.length > 0 && (
+    <Container size="content" as="section" aria-labelledby="deep-dives" class="pb-14">
+      <SectionHeading
+        id="deep-dives"
+        eyebrow={category.index.deepDive.eyebrow}
+        title={category.index.deepDive.heading}
+        description={category.index.deepDive.description}
+        size="md"
+      />
+      <ul class="mt-8 grid gap-6 lg:grid-cols-2">
+        {
+          deepDives.map((entry) => (
+            <li>
+              <EntryCard entry={entry} showCategory={false} />
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  )
+}
+
+{
+  summaries.length > 0 && (
+    <Container size="content" as="section" aria-labelledby="shorter" class="pb-14">
+      <SectionHeading
+        id="shorter"
+        eyebrow={category.index.summary.eyebrow}
+        title={category.index.summary.heading}
+        description={category.index.summary.description}
+        size="md"
+      />
+      <ul class="mt-8 grid gap-4 sm:grid-cols-2">
+        {
+          summaries.map((entry) => (
+            <li>
+              <EntryCard entry={entry} showCategory={false} />
+            </li>
+          ))
+        }
+      </ul>
+    </Container>
+  )
+}
+
+<Container size="content" class="pb-16">
+  <Card variant="feature" padding="lg">
+    <h2 class="text-2xl font-extrabold text-balance text-ink">
+      Looking for a principal engineer who writes things down?
+    </h2>
+    <p class="mt-3 max-w-xl text-pretty text-ink-muted">
+      I am open to full-remote principal and staff roles.
+    </p>
+    <div class="mt-6 flex flex-wrap gap-3">
+      <Button href="/#contact">Get in touch</Button>
+      <Button href="/" variant="secondary">Back to the overview</Button>
+    </div>
+  </Card>
+</Container>

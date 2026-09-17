@@ -17,33 +17,38 @@ const metric = z.object({
   detail: z.string().optional(),
 });
 
-const projects = defineCollection({
-  loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
+const entries = defineCollection({
+  loader: glob({ base: './src/content/entries', pattern: '**/*.{md,mdx}' }),
   schema: ({ image }) =>
     z.object({
-    title: z.string(),
-    /** Short line under the title on the card. */
-    blurb: z.string(),
-    role: z.string(),
-    org: z.string(),
-    period: z.string(),
-    /** 'deep-dive' gets the full case-study treatment; 'summary' gets a short page. */
-    treatment: z.enum(['deep-dive', 'summary']),
-    stack: z.array(z.string()),
-    metrics: z.array(metric).default([]),
-    featured: z.boolean().default(true),
-    /** Lower sorts first on the home page. */
-    order: z.number(),
-    /** True when the work belongs to an employer and copy must stay within public claims. */
-    confidential: z.boolean().default(false),
-    draft: z.boolean().default(false),
-    /** Optional lead image, resolved and optimised by astro:assets. */
-    heroImage: image().optional(),
-    heroImageAlt: z.string().optional(),
-    /** Optional screenshot gallery. Every entry needs real alt text. */
-    gallery: z
-      .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
-      .default([]),
+      title: z.string(),
+      /** Short line under the title on the card. */
+      blurb: z.string(),
+      /** Both kinds of content share one shape: work and off-the-clock entries. */
+      category: z.enum(['work', 'off-the-clock']),
+      /** 'deep-dive' gets the full case-study treatment; 'summary' gets a short page. */
+      treatment: z.enum(['deep-dive', 'summary']),
+      tags: z.array(z.string()).default([]),
+      stack: z.array(z.string()).default([]),
+      metrics: z.array(metric).default([]),
+      role: z.string().optional(),
+      org: z.string().optional(),
+      period: z.string().optional(),
+      /** Emoji or short glyph used as the card's visual anchor. */
+      glyph: z.string().optional(),
+      featured: z.boolean().default(true),
+      /** Lower sorts first within its category. */
+      order: z.number(),
+      /** True when the work belongs to an employer and copy must stay within public claims. */
+      confidential: z.boolean().default(false),
+      draft: z.boolean().default(false),
+      /** Optional lead image, resolved and optimised by astro:assets. */
+      heroImage: image().optional(),
+      heroImageAlt: z.string().optional(),
+      /** Optional screenshot gallery. Every entry needs real alt text. */
+      gallery: z
+        .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
+        .default([]),
     }),
 });
 
@@ -62,25 +67,6 @@ const experience = defineCollection({
     /** Expanded by default in the timeline; older roles collapse to one line. */
     expanded: z.boolean().default(false),
   }),
-});
-
-const hobbies = defineCollection({
-  loader: glob({ base: './src/content/hobbies', pattern: '**/*.{md,mdx}' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      blurb: z.string(),
-      /** Emoji or short glyph used as the card's visual anchor. */
-      glyph: z.string().optional(),
-      tags: z.array(z.string()).default([]),
-      order: z.number(),
-      /** Optional lead image, resolved and optimised by astro:assets. */
-      heroImage: image().optional(),
-      heroImageAlt: z.string().optional(),
-      gallery: z
-        .array(z.object({ src: image(), alt: z.string(), caption: z.string().optional() }))
-        .default([]),
-    }),
 });
 
 const posts = defineCollection({
@@ -102,4 +88,4 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { projects, experience, hobbies, posts };
+export const collections = { entries, experience, posts };

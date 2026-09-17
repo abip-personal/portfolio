@@ -604,6 +604,23 @@ const swatchGroups: Array<[string, string[]]> = [
         </Card>
       </section>
 
+      <!-- Style switcher ------------------------------------------------ -->
+      <section>
+        <SectionHeading
+          id="style"
+          eyebrow="Primitives"
+          title="StyleSwitcher"
+          description="The site ships three complete visual identities — Blueprint / Signal, Archive, and Console — cycled by a select in the header. The style axis is orthogonal to the light/dark theme axis, and the choice persists in localStorage and is stamped before first paint. Hidden below the sm breakpoint: the header row cannot fit it at narrow widths, and the choice carries over from desktop anyway."
+        />
+        <Card padding="lg" class="mt-8">
+          <p class="text-ink-muted">
+            Switch between <strong class="text-ink">Blueprint / Signal</strong>,
+            <strong class="text-ink">Archive</strong> and <strong class="text-ink">Console</strong>
+            using the control in the site header (visible at <code class="font-mono text-sm text-ink">sm</code> and up).
+          </p>
+        </Card>
+      </section>
+
       <!-- Focus ------------------------------------------------------- -->
       <section>
         <SectionHeading

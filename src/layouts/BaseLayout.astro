@@ -15,7 +15,7 @@ const { title, description, image, type, noindex } = Astro.props;
 ---
 
 <!doctype html>
-<html lang={SITE.locale} data-theme="light">
+<html lang={SITE.locale} data-theme="light" data-style="signal">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -45,6 +45,25 @@ const { title, description, image, type, noindex } = Astro.props;
           /* Storage can throw in private mode — fall back to light. */
         }
         document.documentElement.dataset.theme = theme;
+
+        /*
+         * Style axis, orthogonal to theme. Stamped before first paint for the
+         * same reason: a style applied after paint flashes the default first.
+         * Shipped feature: the site offers three complete visual identities
+         * (signal, archive, console); the light/dark theme axis is independent
+         * of the style axis, and both are resolved before first paint so
+         * neither flashes.
+         */
+        let style = 'signal';
+        try {
+          const storedStyle = localStorage.getItem('style');
+          if (storedStyle === 'signal' || storedStyle === 'archive' || storedStyle === 'console') {
+            style = storedStyle;
+          }
+        } catch {
+          /* Storage can throw in private mode — fall back to the default style. */
+        }
+        document.documentElement.dataset.style = style;
       })();
     </script>
   </head>

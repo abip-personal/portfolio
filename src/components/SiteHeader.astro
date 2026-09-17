@@ -1,9 +1,14 @@
 ---
 /**
- * Sticky site header: wordmark, primary nav, theme toggle.
+ * Sticky site header: wordmark, theme toggle, and a single hamburger menu at
+ * every viewport width.
  *
- * The mobile disclosure is a native <details>/<summary>, so the nav costs zero
- * client JavaScript and is keyboard-operable for free.
+ * The hamburger is the ONE nav affordance, desktop and mobile alike. It is a
+ * native <details>/<summary> disclosure, so the menu costs zero client
+ * JavaScript by default and is keyboard-operable for free; a tiny inline
+ * script only mirrors Enter activation (Chrome ignores it) and closes the
+ * panel on link activation or Escape. There is no
+ * focus trap or scroll lock — this is a dropdown, not a full-screen overlay.
  *
  * `/blog/` is filtered out while no published post exists, so the nav never
  * points at an empty room.
@@ -11,6 +16,7 @@
 import { getCollection } from 'astro:content';
 import Container from '@/components/ui/Container.astro';
 import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import StyleSwitcher from '@/components/ui/StyleSwitcher.astro';
 import { NAV, SITE } from '@/data/site';
 
 const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -49,34 +55,11 @@ function isActive(href: string): boolean {
     </a>
 
     <div class="flex items-center gap-2">
-      <!-- Desktop nav -->
-      <nav aria-label="Primary" class="hidden md:block">
-        <ul class="flex items-center gap-1">
-          {
-            nav.map((item) => (
-              <li>
-                <a
-                  href={item.href}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
-                  class:list={[
-                    'inline-block rounded-md px-3 py-2 text-sm font-semibold no-underline transition-colors duration-fast',
-                    isActive(item.href)
-                      ? 'bg-accent-soft text-accent'
-                      : 'text-ink-muted hover:bg-accent-soft hover:text-accent',
-                  ]}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-
+      <StyleSwitcher />
       <ThemeToggle />
 
-      <!-- Mobile disclosure -->
-      <details class="site-nav relative md:hidden">
+      <!-- Primary nav disclosure: the single nav affordance at every width -->
+      <details class="site-nav relative">
         <summary
           class="inline-flex size-10 cursor-pointer list-none items-center justify-center rounded-lg border border-border-subtle bg-surface text-ink-muted transition-colors duration-fast hover:border-border hover:bg-accent-soft hover:text-accent [&::-webkit-details-marker]:hidden"
         >
@@ -104,11 +87,13 @@ function isActive(href: string): boolean {
             <path d="M5 5l14 14M19 5L5 19"></path>
           </svg>
         </summary>
+        <!-- Panel is the primary nav at all widths: give it room on desktop,
+             and links keep ≥44px touch targets down to 320px. -->
         <nav
           aria-label="Primary"
-          class="absolute right-0 z-50 mt-2 w-[min(15rem,calc(100vw-2.5rem))] rounded-xl border border-border-subtle bg-surface p-2 shadow-lift"
+          class="absolute right-0 z-50 mt-2 w-[min(15rem,calc(100vw-2rem))] rounded-xl border border-border-subtle bg-surface p-2 shadow-lift sm:w-[min(18rem,calc(100vw-3rem))] md:w-72"
         >
-          <ul class="flex flex-col">
+          <ul class="flex flex-col gap-1">
             {
               nav.map((item) => (
                 <li>
@@ -116,7 +101,7 @@ function isActive(href: string): boolean {
                     href={item.href}
                     aria-current={isActive(item.href) ? 'page' : undefined}
                     class:list={[
-                      'block rounded-lg px-3 py-2.5 text-base font-semibold no-underline transition-colors duration-fast',
+                      'block min-h-11 rounded-lg px-3.5 py-2.5 text-base font-semibold no-underline transition-colors duration-fast',
                       isActive(item.href)
                         ? 'bg-accent-soft text-accent'
                         : 'text-ink hover:bg-accent-soft hover:text-accent',
@@ -149,12 +134,20 @@ function isActive(href: string): boolean {
 </style>
 
 <script is:inline>
-  // Close the mobile disclosure once a link inside it is followed, and on Esc.
+  // Close the nav disclosure once a link inside it is followed, and on Esc.
+  // Enter activation of <summary> is also inconsistent across browsers
+  // (Chrome ignores it), so mirror it here — Space already works natively.
   (() => {
     const nav = document.querySelector('details.site-nav');
     if (!nav) return;
     nav.addEventListener('click', (event) => {
       if (event.target instanceof Element && event.target.closest('nav a')) nav.open = false;
+    });
+    nav.querySelector('summary')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        nav.open = !nav.open;
+      }
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && nav.open) {

@@ -1,8 +1,9 @@
 ---
 title: "Agriluso"
-blurb: "A multi-service platform connecting Portuguese farmers and agronomists in real time. Solo-architected and built, from data model to deployment target."
-role: "Founder, sole architect and engineer"
+blurb: "A multi-service platform connecting Portuguese farmers and agronomists in real time. Architected and led end to end, from data model to deployment target."
+role: "Founder and lead developer"
 org: "Agriluso"
+category: "work"
 period: "In active development, pre-launch"
 treatment: "deep-dive"
 stack:
@@ -15,13 +16,15 @@ stack:
   - "Expo"
   - "Docker"
   - "AWS (target)"
+tags:
+  - "Agtech"
+  - "Real-time"
+  - "Multi-service platform"
+  - "Mobile app"
 metrics:
   - value: "3"
     label: "services"
-    detail: "REST API, real-time chat service with NLP-based smart actions, and a weather/phytosanitary data ingestion service."
-  - value: "1"
-    label: "engineer"
-    detail: "Solo-architected and built end to end, including the mobile app."
+    detail: "REST API, real-time chat service with NLP-based smart actions, and a weather/phytosanitary data ingestion service — plus an offline-first mobile app."
 featured: true
 order: 2
 confidential: false
@@ -34,14 +37,14 @@ Agriluso ([agriluso.pt](https://agriluso.pt)) connects Portuguese farmers with a
 
 The "recorded properly" part is the interesting half. Portuguese farmers are legally required to keep a field logbook of treatments applied. It is paperwork nobody wants to do and everybody has to, and it is generated as a by-product of exactly the conversations the platform already hosts.
 
-I am the sole architect and engineer on it. It is in active development and pre-launch.
+I am the lead developer on it — I architected the platform and drive most of the build — with a small team working alongside me. It is in active development and pre-launch.
 
 ## Constraints
 
 - **The users are not technical, and they are outdoors.** The mobile app has to work with intermittent or absent connectivity and it has to survive being used with one hand in a field.
 - **Geography is a first-class part of the data model.** Parcels, treatments and advice are all located. This is not a lat/long column bolted onto a table.
 - **Personal data, and a legal record.** GDPR applies, and the logbook is a compliance artefact, so its integrity matters more than most application data.
-- **One engineer.** Every service I add is a service I operate. That is the dominant constraint on the whole design.
+- **A small team.** Every service I add is a service one of us has to operate. That is the dominant constraint on the whole design.
 
 {/* TODO(diogo): what's the actual scale target at launch — number of farmers/agronomists, expected concurrent chat sessions? It changes how defensible some of the choices below read. */}
 
@@ -68,7 +71,7 @@ The logbook is the join between the two halves: a smart action confirmed in chat
 
 **PostGIS instead of geo in the application layer.** The alternative — store coordinates, do containment and distance in Node — is simpler to start and needs no extension. It loses as soon as you want "which parcels are within this alert zone" to be fast and correct across polygon geometry rather than points. Doing that in application code means reimplementing spatial indexing badly.
 
-**A separate chat service rather than websockets in the monolith.** Keeping it in the API would be one fewer thing to deploy, which matters a lot when you are one person. It loses because the connection-heavy, long-lived, memory-resident workload scales along a completely different axis from the request/response API. Coupling them means scaling the API for chat connections, or degrading chat when the API is under load.
+**A separate chat service rather than websockets in the monolith.** Keeping it in the API would be one fewer thing to deploy, which matters a lot when you are a small team. It loses because the connection-heavy, long-lived, memory-resident workload scales along a completely different axis from the request/response API. Coupling them means scaling the API for chat connections, or degrading chat when the API is under load.
 
 **Offline-first in the mobile app, not offline-tolerant.** Treating connectivity as normal and offline as an error state is far less code. It loses because the actual usage location is a field. If the app is only usable back at the house, the logbook gets filled in from memory later, which is exactly the failure mode the product exists to remove.
 

@@ -1,0 +1,43 @@
+---
+/**
+ * Role / organisation / period for an entry, as a definition list so the
+ * relationship between label and value survives being read out of order.
+ *
+ * All three fields are optional: off-the-clock entries carry none, in which
+ * case the component renders nothing at all rather than an empty band.
+ */
+interface Props {
+  role?: string;
+  org?: string;
+  period?: string;
+  class?: string;
+}
+
+const { role, org, period, class: className } = Astro.props;
+
+const items = [
+  { term: 'Role', value: role },
+  { term: 'Organisation', value: org },
+  { term: 'Period', value: period },
+].filter((item) => Boolean(item.value));
+---
+
+{
+  items.length > 0 && (
+    <dl
+      class:list={[
+        'grid gap-x-8 gap-y-4 border-y border-border-subtle py-5 sm:grid-cols-3',
+        className,
+      ]}
+    >
+      {
+        items.map((item) => (
+          <div>
+            <dt class="text-2xs font-bold tracking-[0.16em] text-ink-subtle uppercase">{item.term}</dt>
+            <dd class="mt-1.5 font-semibold text-pretty text-ink">{item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  )
+}

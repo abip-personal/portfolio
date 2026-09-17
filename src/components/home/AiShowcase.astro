@@ -1,0 +1,55 @@
+---
+/**
+ * The AI-build claim, made concrete by what is actually in this repo:
+ * end-to-end AI tooling, parallel scoped tasks with a human review gate on
+ * every change, and the three visual identities behind the header's style
+ * switcher. Three cards, all of them about this repo. Everything here is
+ * verifiable in the git history.
+ */
+import Container from '@/components/ui/Container.astro';
+import Card from '@/components/ui/Card.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+
+const points: Array<{ title: string; body: string }> = [
+  {
+    title: 'Done with AI, end to end',
+    body: 'The design direction, the copy, the components, and the accessibility and performance audits that ship with the site were all worked with Claude, side by side. The trail is verifiable — the git history says so.',
+  },
+  {
+    title: 'How the work actually ran',
+    body: 'Waves of scoped tasks, each one an agent working in its own isolated worktree — in parallel. Nothing merged without passing a human review gate, and the review pass sits in the commit history like everything else.',
+  },
+  {
+    title: 'Three looks, one click',
+    body: 'The switcher in the header re-renders these live pages in each of the three visual identities — Blueprint/Signal, Archive and Console. A design call deserves the real thing, not swatches on a slide.',
+  },
+];
+---
+
+<section id="how-this-was-built" class="blueprint-grid scroll-mt-24">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      eyebrow="How this was built"
+      title="This site is the showcase"
+      description="The portfolio was designed, copy-written and built end to end with AI tooling — and every change went through a human review gate on its way in. That is the workflow, and this repo is the paper trail."
+    />
+
+    <div class="mt-10 grid gap-5 sm:grid-cols-3">
+      {
+        points.map((point) => (
+          <Card variant="default" padding="lg" as="article" class="h-full">
+            <h3 class="flex items-start gap-3 text-xl font-bold text-ink">
+              <span
+                aria-hidden="true"
+                class="signal-rule mt-1.5 h-5 w-[4px] shrink-0 rounded-full"
+                data-orientation="vertical"
+              />
+              <span class="min-w-0">{point.title}</span>
+            </h3>
+            <p class="mt-3 text-pretty text-ink-muted">{point.body}</p>
+          </Card>
+        ))
+      }
+    </div>
+  </Container>
+</section>
