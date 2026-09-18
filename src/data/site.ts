@@ -50,7 +50,7 @@ export function yearsShippingWord(now = new Date()): string {
 const YEARS = yearsShipping();
 
 export const SITE = {
-  url: 'https://diogoferreira.dev',
+  url: 'https://portfolio.abip.pt',
   name: 'Diogo Ferreira',
   role: 'Principal Software Engineer',
   tagline: 'Full-Stack Systems · Cloud-Native Architecture',
