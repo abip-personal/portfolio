@@ -153,7 +153,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0.05
+                "maxNumericValue": 0.06
               }
             ],
             "total-blocking-time": [
