@@ -1,0 +1,59 @@
+---
+/**
+ * 404 page.
+ *
+ * This is not decoration: `wrangler.toml` sets `not_found_handling =
+ * "404-page"`, which makes Cloudflare serve `dist/404.html` for every miss on
+ * the deployed site. Without this route the build emits no such file and the
+ * setting falls through to Cloudflare's own bare error page — no styling, no
+ * nav, no way back. So the route exists to give that setting something to
+ * point at, and it deliberately uses the full site shell (header + footer) so
+ * a dead link still lands somewhere navigable.
+ *
+ * noindex — a 404 is a dead end, not site content. Static like every other
+ * page: no client-side JS, nothing that needs a runtime.
+ *
+ * No host is hardcoded anywhere here; the canonical origin comes from SITE via
+ * BaseLayout, so this page follows the production domain wherever it moves.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+---
+
+<BaseLayout
+  title="Page not found"
+  description="That page does not exist. Head back to the overview or browse the case studies."
+  noindex
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <Container size="content" class="py-20 sm:py-28">
+    <p class="flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+      <SignalRule length="1.75rem" thickness="3px" />
+      Error 404
+    </p>
+
+    <h1 class="mt-5 text-4xl font-extrabold text-balance text-ink sm:text-5xl">
+      This page doesn't exist
+    </h1>
+
+    <div class="mt-6 max-w-2xl">
+      <SignalRule length="7rem" thickness="6px" />
+      <p class="mt-6 text-lg text-pretty text-ink-muted">
+        The link is broken, the page moved, or it was never here to begin with. Nothing is on fire
+        — everything else is still where you left it.
+      </p>
+    </div>
+
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+      <Button href="/" size="lg">Back to the overview</Button>
+      <Button href="/work/" variant="secondary" size="lg">Browse the work</Button>
+      <Button href="/blog/" variant="ghost" size="lg">Read the writing</Button>
+    </div>
+  </Container>
+</BaseLayout>
