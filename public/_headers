@@ -8,7 +8,23 @@
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
-  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  # Scoped deliberately: the canonical host is portfolio.abip.pt, a subdomain of
+  # abip.pt, which is a private zone hosting a self-hosted/home-automation stack
+  # — not a standalone apex we own end to end. Both optional directives were
+  # dropped on purpose rather than inherited from the old diogoferreira.dev line.
+  #   includeSubDomains — from this host it binds only *.portfolio.abip.pt. No
+  #     such hosts exist and none are planned, so it is cost without benefit: it
+  #     would pre-commit a namespace we never use while protecting nothing.
+  #   preload — the HSTS preload list only accepts the registrable domain, so an
+  #     entry for portfolio.abip.pt cannot be submitted and the directive is
+  #     inert from here. Worse, it advertises an intent we have not formed:
+  #     acting on it means submitting abip.pt itself, which binds *every* host in
+  #     that zone to HTTPS-only, including internal services still on plain HTTP.
+  #     That is a one-way door — slow and painful to unwind — and must be a
+  #     separate, deliberate decision taken only once every abip.pt host is
+  #     confirmed HTTPS-capable. Nothing has been submitted.
+  # The max-age is unchanged (2 years) and still pins this host to HTTPS.
+  Strict-Transport-Security: max-age=63072000
   # Trade-off: 'unsafe-inline' is required in both script-src and style-src.
   #   script-src — BaseLayout.astro runs an `is:inline` theme script in <head>
   #     before first paint. A hash would work, but Astro does not emit CSP hashes
