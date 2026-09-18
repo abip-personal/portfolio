@@ -1,36 +1,60 @@
 # Deploying
 
 The site is a fully static Astro build (`output: 'static'`) hosted on
-**Cloudflare Pages**. There is no server runtime, no Pages Function and no
-binding — Pages serves `dist/` and nothing else.
+**Cloudflare Workers with Static Assets**. There is no server runtime, no
+script entrypoint and no binding — the Worker is an `[assets]` block and
+nothing else, so requests are served straight from the edge asset store
+without ever booting an isolate.
+
+> **Why Workers and not Pages?** Cloudflare now positions Workers as the
+> primary platform for new projects. Pages is still supported and still works,
+> but it is no longer where new features land, and the two platforms have
+> converged: Static Assets gives a static site the same edge serving, the same
+> `_headers` support and the same free custom domains, while leaving the door
+> open to adding a real Worker entrypoint later without migrating hosts.
+
+> **One-time dashboard setup** (creating the Worker, connecting the repo,
+> attaching the domain) is written up separately in
+> [`docs/CLOUDFLARE-SETUP.md`](docs/CLOUDFLARE-SETUP.md). This file covers the
+> repo-side config and the day-to-day deploy commands.
 
 | Setting | Value |
 | --- | --- |
-| Framework preset | Astro (or "None") |
+| Platform | Cloudflare Workers (Static Assets) |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
+| Assets directory | `dist` |
 | Root directory | *(repository root)* |
-| Node version | 22 |
+| Node version | 24 |
+| Production host | `portfolio.abip.pt` |
 
-`wrangler.toml` already declares `pages_build_output_dir = "dist"`, so the
-Wrangler path needs no extra flags.
+`wrangler.toml` already declares the `[assets]` block (`directory = "./dist"`,
+`not_found_handling = "404-page"`), so the Wrangler path needs no extra flags.
+
+Node 24 is not a preference, it is what the repo pins: `package.json` has
+`"engines": { "node": ">=24" }` and `.github/workflows/ci.yml` uses
+`node-version: 24`. Any build environment on an older Node will either refuse
+to install or build something CI never tested.
 
 ---
 
-## Option A — Git integration (recommended)
+## Option A — Workers Builds (recommended)
 
-Pushes build and deploy themselves; PRs get preview URLs.
+Cloudflare's Git integration for Workers. Pushes build and deploy themselves.
 
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
-   **Connect to Git**, and pick this repository.
-2. Set the build command and output directory from the table above.
-3. Under **Environment variables** → **Production**, add `NODE_VERSION = 22`.
-   Do the same for **Preview**. (Cloudflare's default Node is older than Astro 7
-   supports; this is the one variable the build genuinely needs.)
-4. **Save and Deploy**.
+1. Cloudflare dashboard → **Workers & Pages** → the `portfolio` Worker →
+   **Settings** → **Build** → **Connect** the repository.
+2. Set the build command (`npm run build`) and leave the deploy command as
+   `npx wrangler deploy`. The assets directory comes from `wrangler.toml`.
+3. Add `NODE_VERSION = 24` as a build environment variable. (Cloudflare's
+   default Node is older than Astro 7 supports; this is the one variable the
+   build genuinely needs.)
+4. Save. The next push to `main` deploys to production.
 
-From then on: every push to `main` deploys to production, and every other branch
-and PR gets its own `<hash>.<project>.pages.dev` preview.
+**Non-production branch builds are OFF by default on Workers.** This is the one
+behavioural difference that bites people coming from Pages, where every branch
+and PR got an automatic preview URL. If you want PR previews, turn on
+non-production branch builds explicitly under the same **Build** settings; until
+you do, only `main` builds.
 
 ## Option B — Wrangler from a terminal or another CI
 
@@ -38,19 +62,28 @@ and PR gets its own `<hash>.<project>.pages.dev` preview.
 npm ci
 npm run build
 npx wrangler login          # once per machine
-npm run deploy              # = npm run build && wrangler pages deploy
+npm run deploy              # = npm run build && wrangler deploy
 ```
 
-`npm run deploy` reads `wrangler.toml`, so it picks up the project name and
-`dist/` automatically. To deploy a branch as a preview instead of production:
+`npm run deploy` reads `wrangler.toml`, so it picks up the Worker name and the
+assets directory automatically. To publish a preview instead of production,
+upload a *version* rather than deploying one — Workers preview URLs come from
+versioned uploads, and there is no `--branch` flag:
 
 ```sh
-npx wrangler pages deploy --branch preview
+npx wrangler versions upload
 ```
+
+That prints a `<version-prefix>-portfolio.<subdomain>.workers.dev` preview URL
+and changes nothing about what production is serving. Promote it later with
+`npx wrangler versions deploy` if you want it live.
 
 For non-interactive deploys (another CI, a local script), set:
 
-- `CLOUDFLARE_API_TOKEN` — an API token with **Account → Cloudflare Pages → Edit**
+- `CLOUDFLARE_API_TOKEN` — an API token with:
+  - **Account → Workers Scripts → Edit**
+  - **Account → Account Settings → Read**
+  - **Zone → Workers Routes → Edit** (needed only for the custom domain/route)
 - `CLOUDFLARE_ACCOUNT_ID` — the account ID from the dashboard sidebar
 
 Both are secrets; never commit them. The GitHub Actions workflow in this repo
@@ -61,16 +94,19 @@ required unless you add a deploy step.
 
 ## Custom domain
 
-1. Add the domain (or subdomain) as a zone in Cloudflare, or move its nameservers
-   to Cloudflare if it is registered elsewhere.
-2. Pages project → **Custom domains** → **Set up a custom domain** →
-   `diogoferreira.dev`. Cloudflare creates the `CNAME`/flattened `A` record and
-   provisions the certificate automatically.
-3. Repeat for `www.diogoferreira.dev` if you want it, then add a **Redirect Rule**
-   sending `www` → apex (301) so there is a single canonical host. The canonical
-   URL, sitemap, RSS feed and OG image URLs are all derived from `SITE.url` in
-   `src/data/site.ts` — if the production host ever changes, change it there and
-   in `public/robots.txt`.
+Workers custom domains require the zone's nameservers to be Cloudflare-managed;
+a partial (CNAME) setup is not enough. `abip.pt` must be a full zone in the same
+Cloudflare account before step 2 will offer the domain.
+
+1. Add `abip.pt` as a zone in Cloudflare and move its nameservers there if it is
+   registered elsewhere.
+2. Worker → **Settings** → **Domains & Routes** → **Add** → **Custom domain** →
+   `portfolio.abip.pt`. Cloudflare creates the DNS record and provisions the
+   certificate automatically.
+3. There is exactly one canonical host and no second domain or redirect. The
+   canonical URL, sitemap, RSS feed and OG image URLs are all derived from
+   `SITE.url` in `src/data/site.ts` — if the production host ever changes,
+   change it there and in `public/robots.txt`.
 4. Leave **Always Use HTTPS** on. `public/_headers` already sends HSTS with
    `preload`; only submit the domain to the HSTS preload list once you are
    certain every subdomain can serve HTTPS.
@@ -79,12 +115,20 @@ required unless you add a deploy step.
 
 ## Headers, caching and routing
 
+`_headers` **is** supported by Workers Static Assets — it carried over from
+Pages unchanged, so `public/_headers` stays exactly as it is and needs no
+migration. Two limits worth knowing before it grows: a maximum of **100 rules**
+and a maximum of **2000 characters per line**. The CSP line is by far the
+longest one here, so check it against that ceiling before extending it.
+
 - `public/_headers` → copied to `dist/_headers` at build time. It sets the
   security headers (CSP, HSTS, frame/sniffing protection) and the cache policy:
   immutable one-year caching for `/_astro/*` (content-hashed), one day for OG
   cards, and `must-revalidate` for HTML so a deploy is visible immediately.
-- `public/_routes.json` → declares that no request needs a Pages Function, so
-  everything is served straight from static assets.
+- Routing needs no config file. The old `public/_routes.json` was a Pages-only
+  mechanism for declaring that no request needs a Function; on Workers that is
+  simply what happens when `wrangler.toml` declares no `main` entrypoint, so the
+  file has been deleted rather than translated.
 - The CSP allows `'unsafe-inline'` for scripts and styles. This is deliberate and
   documented inline in `public/_headers`: `BaseLayout.astro` runs an `is:inline`
   theme script before first paint, and Astro inlines small stylesheets. Tighten
@@ -93,26 +137,33 @@ required unless you add a deploy step.
 To sanity-check the headers after a deploy:
 
 ```sh
-curl -sI https://diogoferreira.dev/ | grep -i -E 'content-security|strict-transport|cache-control'
-curl -sI https://diogoferreira.dev/_astro/ -o /dev/null -w '%{http_code}\n'
+curl -sI https://portfolio.abip.pt/ | grep -i -E 'content-security|strict-transport|cache-control'
+curl -sI https://portfolio.abip.pt/_astro/ -o /dev/null -w '%{http_code}\n'
 ```
 
 Note that `_headers` is **not** applied by `astro preview` or by the Lighthouse
 CI static server — those serve raw files. Header behaviour can only be verified
-against a real Pages deployment (a preview URL is fine).
+against a real Workers deployment (a `versions upload` preview URL is fine).
 
 ---
 
 ## Rollback
 
-Pages keeps every deployment. Dashboard → the project → **Deployments** → pick a
-previous one → **Rollback**. Nothing needs to be rebuilt.
+Workers keeps every version and every deployment. From a terminal:
+
+```sh
+npx wrangler deployments list   # find the version you want
+npx wrangler rollback           # or: npx wrangler rollback <version-id>
+```
+
+From the dashboard: the Worker → **Deployments** tab → pick a previous
+deployment → roll back to it. Nothing needs to be rebuilt either way.
 
 ---
 
 ## What CI does
 
-`.github/workflows/ci.yml` runs on every push and PR:
+`.github/workflows/ci.yml` runs on every push to `main` and every PR:
 
 1. `npm ci`
 2. `npm run check` — `astro check` (types + content-collection schemas)

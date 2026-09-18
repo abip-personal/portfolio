@@ -14,7 +14,7 @@
     "lint:links": "node scripts/check-links.mjs dist",
     "lighthouse": "npx -y @lhci/cli@0.15.x autorun --config=./lighthouserc.json",
     "verify": "npm run check && npm run build && npm run lint:links",
-    "deploy": "npm run build && npx -y wrangler@4 pages deploy",
+    "deploy": "npm run build && npx -y wrangler@4 deploy",
     "astro": "astro"
   },
   "dependencies": {
