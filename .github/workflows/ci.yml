@@ -1,8 +1,11 @@
 name: CI
 
+# Pull requests and main only. Pushing to a branch with an open PR used to
+# fire `push` and `pull_request` for the same commit, running the whole
+# pipeline twice; scoping `push` to main leaves exactly one run per commit.
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -30,7 +33,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Install dependencies

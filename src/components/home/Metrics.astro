@@ -7,6 +7,7 @@
 import Container from '@/components/ui/Container.astro';
 import Card from '@/components/ui/Card.astro';
 import Stat from '@/components/ui/Stat.astro';
+import { yearsShipping } from '@/data/site';
 
 const stats = [
   {
@@ -28,7 +29,7 @@ const stats = [
     href: '/work/ai-assisted-engineering/',
   },
   {
-    value: '18',
+    value: String(yearsShipping()),
     label: 'Years shipping',
     detail: 'Payments, regulated gaming, healthcare, automotive.',
     href: undefined,

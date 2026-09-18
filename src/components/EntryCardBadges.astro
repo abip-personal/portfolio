@@ -1,0 +1,60 @@
+---
+/**
+ * The badge row at the top of every EntryCard.
+ *
+ * Shared vocabulary across both categories: the treatment badge reads
+ * 'Case study' or 'Summary' whether the entry is work or off-the-clock, which
+ * is what makes the two home sections read as one system. The category badge
+ * is suppressed on the index pages, where the page heading already says which
+ * category you are in.
+ *
+ * Off-the-clock entries have no org/period, so the credit line simply does not
+ * render and the glyph carries the card instead.
+ */
+import Badge from '@/components/ui/Badge.astro';
+
+interface Props {
+  treatment: 'deep-dive' | 'summary';
+  categoryLabel: string;
+  showCategory: boolean;
+  glyph?: string;
+  creditLine: string;
+  /** The larger home-page sizing uses a bigger glyph. */
+  emphasis?: 'feature' | 'default';
+}
+
+const {
+  treatment,
+  categoryLabel,
+  showCategory,
+  glyph,
+  creditLine,
+  emphasis = 'default',
+} = Astro.props;
+
+const isDeepDive = treatment === 'deep-dive';
+---
+
+<div class="flex flex-wrap items-center gap-2">
+  {
+    glyph && (
+      <span
+        aria-hidden="true"
+        class:list={['leading-none', emphasis === 'feature' ? 'text-xl' : 'text-lg']}
+      >
+        {glyph}
+      </span>
+    )
+  }
+  <Badge variant={isDeepDive ? 'accent' : 'neutral'}>
+    {isDeepDive ? 'Case study' : 'Summary'}
+  </Badge>
+  {showCategory && <Badge variant="outline">{categoryLabel}</Badge>}
+  {
+    creditLine && (
+      <span class="text-xs font-semibold tracking-wide text-ink-subtle uppercase">
+        {creditLine}
+      </span>
+    )
+  }
+</div>

@@ -1,0 +1,36 @@
+---
+/**
+ * Off the clock. Same EntryCard grid as FeaturedWork (emphasis="feature"),
+ * scoped to the 'off-the-clock' category — identical treatment to Selected
+ * work, including the shared 'Case study' / 'Summary' badge vocabulary.
+ * The MDX bodies deliberately do NOT render here — each card links to its
+ * own page, which is where the full write-up lives.
+ */
+import { getCollection } from 'astro:content';
+import Container from '@/components/ui/Container.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import EntryCard from '@/components/EntryCard.astro';
+
+const entries = (await getCollection('entries', ({ data }) => !data.draft))
+  .filter((entry) => entry.data.category === 'off-the-clock')
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="border-y border-border-subtle bg-surface-raised">
+  <Container size="wide" class="py-16 sm:py-24">
+    <SectionHeading
+      id="off-the-clock"
+      eyebrow="Off the clock"
+      title="Still building, just for me"
+      description="The projects nobody asked for — the ones where I own every layer, including the enclosure."
+    />
+
+    <div class="mt-10 grid gap-5 lg:grid-cols-2">
+      {
+        entries.map((entry) => (
+          <EntryCard entry={entry} emphasis="feature" class="h-full" />
+        ))
+      }
+    </div>
+  </Container>
+</section>

@@ -1,14 +1,19 @@
 ---
 /**
- * The 20-minute read. A case study leads with who did what and the numbers
- * that prove it, then gives the argument in full at a comfortable measure,
- * then hands the reader somewhere to go next.
+ * The 20-minute read, for either category. A single entry page leads with
+ * who did what and the numbers that prove it, then gives the argument in
+ * full at a comfortable measure, then hands the reader somewhere to go next.
+ *
+ * Category-aware through categories.ts: the eyebrow, the back link and the
+ * badge all read from the entry's own category, so work and off-the-clock
+ * pages share one layout.
  */
 import type { CollectionEntry } from 'astro:content';
+import { categories, entryHref } from '@/lib/categories';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import SiteFooter from '@/components/SiteFooter.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
-import ProjectMeta from '@/components/ProjectMeta.astro';
+import EntryMeta from '@/components/EntryMeta.astro';
 import Badge from '@/components/ui/Badge.astro';
 import Button from '@/components/ui/Button.astro';
 import Card from '@/components/ui/Card.astro';
@@ -16,19 +21,22 @@ import Container from '@/components/ui/Container.astro';
 import Prose from '@/components/ui/Prose.astro';
 import SignalRule from '@/components/ui/SignalRule.astro';
 import Stat from '@/components/ui/Stat.astro';
+import TagList from '@/components/TagList.astro';
 
-type Project = CollectionEntry<'projects'>;
+type Entry = CollectionEntry<'entries'>;
 
 interface Props {
-  project: Project;
-  prev?: Project;
-  next?: Project;
+  entry: Entry;
+  prev?: Entry;
+  next?: Entry;
 }
 
-const { project, prev, next } = Astro.props;
-const { title, blurb, role, org, period, stack, metrics, treatment, confidential } = project.data;
+const { entry, prev, next } = Astro.props;
+const { title, blurb, glyph, role, org, period, stack, metrics, treatment, category: slug, confidential, tags } =
+  entry.data;
 
-const eyebrow = treatment === 'deep-dive' ? 'Case study' : 'Selected work';
+const category = categories[slug];
+const eyebrow = category.detailEyebrow[treatment];
 const metricColumns =
   metrics.length >= 3 ? 'sm:grid-cols-2 lg:grid-cols-3' : metrics.length === 2 ? 'sm:grid-cols-2' : '';
 ---
@@ -36,7 +44,7 @@ const metricColumns =
 <BaseLayout
   title={title}
   description={blurb}
-  image={`/og/projects/${project.id}.png`}
+  image={`/og/entries/${entry.id}.png`}
   type="article"
 >
   <SiteHeader slot="header" />
@@ -45,10 +53,10 @@ const metricColumns =
   <article>
     <Container size="content" as="header" class="pt-10 pb-8 sm:pt-14">
       <a
-        href="/work/"
+        href={category.base}
         class="inline-flex items-center gap-2 text-sm font-semibold text-ink-muted no-underline hover:text-accent"
       >
-        <span aria-hidden="true">←</span> All work
+        <span aria-hidden="true">←</span> {category.backLabel}
       </a>
 
       <p class="mt-8 flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
@@ -59,12 +67,26 @@ const metricColumns =
       <h1 class="mt-4 max-w-4xl text-4xl font-extrabold text-balance text-ink">{title}</h1>
       <p class="mt-5 max-w-3xl text-lg text-pretty text-ink-muted sm:text-xl">{blurb}</p>
 
-      <ProjectMeta role={role} org={org} period={period} class="mt-8" />
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        {glyph && <span aria-hidden="true" class="text-xl leading-none">{glyph}</span>}
+        <Badge variant="outline">{category.label}</Badge>
+      </div>
+
+      <EntryMeta role={role} org={org} period={period} class="mt-8" />
 
       <h2 class="sr-only">Stack</h2>
       <ul class="mt-6 flex flex-wrap gap-2" aria-label="Technologies used">
         {stack.map((item) => <li><Badge variant="neutral">{item}</Badge></li>)}
       </ul>
+
+      {
+        tags.length > 0 && (
+          <div class="mt-4">
+            <h2 class="sr-only">Tags</h2>
+            <TagList tags={tags} linked={false} />
+          </div>
+        )
+      }
 
       {
         confidential && (
@@ -107,26 +129,31 @@ const metricColumns =
 
   {
     (prev || next) && (
-      <Container size="content" as="nav" aria-labelledby="more-work-heading" class="pb-4">
-        <h2 id="more-work-heading" class="text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
-          More work
+      <Container size="content" as="nav" aria-labelledby="more-heading" class="pb-4">
+        <h2
+          id="more-heading"
+          class="text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase"
+        >
+          More {category.label.toLowerCase()}
         </h2>
         <ul class="mt-6 grid gap-4 sm:grid-cols-2">
           {[
             { entry: prev, direction: 'Previous' },
             { entry: next, direction: 'Next' },
           ]
-            .filter((item): item is { entry: Project; direction: string } => Boolean(item.entry))
-            .map(({ entry, direction }) => (
-              <li>
-                <Card href={`/work/${entry.id}/`} padding="md" class="h-full">
+            .filter((item): item is { entry: Entry; direction: string } => Boolean(item.entry))
+            .map(({ entry: item, direction }) => (
+              <li class:list={[direction === 'Next' && 'sm:col-start-2']}>
+                <Card href={entryHref(item)} padding="md" class="h-full">
                   <p class="text-xs font-bold tracking-[0.14em] text-ink-subtle uppercase">
                     {direction}
                   </p>
                   <p class="mt-2 text-lg font-bold text-pretty text-ink group-hover:text-accent">
-                    {entry.data.title}
+                    {item.data.title}
                   </p>
-                  <p class="mt-2 text-sm text-ink-muted">{entry.data.org}</p>
+                  <p class="mt-2 text-sm text-ink-muted">
+                    {item.data.org ?? item.data.blurb}
+                  </p>
                 </Card>
               </li>
             ))}
@@ -143,7 +170,7 @@ const metricColumns =
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <Button href="/#contact">Get in touch</Button>
-        <Button href="/work/" variant="secondary">See all work</Button>
+        <Button href={category.base} variant="secondary">{category.backLabel}</Button>
       </div>
     </Card>
   </Container>

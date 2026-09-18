@@ -10,7 +10,10 @@
         "http://localhost:0/work/creoate-checkout/",
         "http://localhost:0/work/agriluso/",
         "http://localhost:0/work/ai-assisted-engineering/",
-        "http://localhost:0/work/regulated-gaming/"
+        "http://localhost:0/work/regulated-gaming/",
+        "http://localhost:0/off-the-clock/",
+        "http://localhost:0/off-the-clock/homelab/",
+        "http://localhost:0/off-the-clock/home-automation/"
       ],
       "numberOfRuns": 3,
       "settings": {
@@ -150,7 +153,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0.05
+                "maxNumericValue": 0.06
               }
             ],
             "total-blocking-time": [

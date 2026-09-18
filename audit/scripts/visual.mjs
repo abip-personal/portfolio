@@ -102,8 +102,106 @@ for (const [slug, route] of ROUTES) {
   }
   await ctx.close();
 }
+// ---------------------------------------------------------------------------
+// Style-axis contrast audit.
+//
+// The visual loop above only knows the theme axis. The style axis
+// (`data-style`: signal | archive | console) is orthogonal, and archive and
+// console were written before launch but never audited, so iterate all six
+// style x theme combinations and measure every required token pair against
+// surface, surface-raised and surface-sunken:
+//   ink, ink-muted, ink-subtle, accent (text) >= 4.5:1
+//   border (UI)                               >= 3:1
+// Uses the same WCAG relative-luminance maths as the DOM scan above.
+// ---------------------------------------------------------------------------
+const STYLES = ['signal', 'archive', 'console'];
+const THEMES = ['light', 'dark'];
+
+/** Runs in the page: reads the live token values and returns every pair. */
+const TOKEN_SCAN = () => {
+  const TEXT_TOKENS = ['--ink', '--ink-muted', '--ink-subtle', '--accent'];
+  const UI_TOKENS = ['--border'];
+  const BG_TOKENS = ['--surface', '--surface-raised', '--surface-sunken'];
+  const cs = getComputedStyle(document.documentElement);
+  const read = (name) => cs.getPropertyValue(name).trim();
+  const rgbOf = (v) => {
+    if (v.startsWith('#')) {
+      let h = v.slice(1);
+      if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+    return v.match(/[\d.]+/g).slice(0, 3).map(Number);
+  };
+  const lum = ([r, g, b]) => {
+    const f = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+  };
+  const rows = [];
+  for (const bg of BG_TOKENS) {
+    const bgValue = read(bg);
+    const bgLum = lum(rgbOf(bgValue));
+    for (const token of [...TEXT_TOKENS, ...UI_TOKENS]) {
+      const min = UI_TOKENS.includes(token) ? 3 : 4.5;
+      const fgValue = read(token);
+      const fgLum = lum(rgbOf(fgValue));
+      const ratio = (Math.max(fgLum, bgLum) + 0.05) / (Math.min(fgLum, bgLum) + 0.05);
+      rows.push({ token, bg, fgValue, bgValue, ratio: +ratio.toFixed(2), min, pass: ratio >= min });
+    }
+  }
+  return rows;
+};
+
+const tokenReport = [];
+let tokenFailures = 0;
+
+for (const style of STYLES) {
+  for (const theme of THEMES) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/styleguide/', { waitUntil: 'networkidle' });
+    await page.evaluate(([s, t]) => {
+      document.documentElement.dataset.style = s;
+      document.documentElement.dataset.theme = t;
+    }, [style, theme]);
+    const rows = await page.evaluate(TOKEN_SCAN);
+    const failures = rows.filter((r) => !r.pass);
+    tokenFailures += failures.length;
+
+    for (const r of rows) {
+      console.log(
+        `TOKEN ${style}/${theme} ${r.token} (${r.fgValue}) on ${r.bg} (${r.bgValue}) ` +
+          `ratio=${r.ratio} required>=${r.min} ${r.pass ? 'PASS' : 'FAIL'}`,
+      );
+    }
+    const status = failures.length ? `FAIL (${failures.length}/${rows.length} pairs)` : `PASS (${rows.length}/${rows.length})`;
+    console.log(`COMBO ${style}/${theme}: ${status}`);
+
+    tokenReport.push(
+      `### ${style} x ${theme} - ${status}\n\n` +
+        `| token | background | fg | bg | ratio | min | result |\n|---|---|---|---|---|---|---|\n` +
+        rows
+          .map((r) => `| ${r.token} | ${r.bg} | ${r.fgValue} | ${r.bgValue} | ${r.ratio} | ${r.min} | ${r.pass ? 'PASS' : 'FAIL'} |`)
+          .join('\n') +
+        '\n',
+    );
+    await ctx.close();
+  }
+}
+
+console.log(`\nSTYLE-AXIS CONTRAST: ${tokenFailures === 0 ? 'ALL PASS' : tokenFailures + ' FAILING PAIRS'}`);
+
 await browser.close();
 
 const anyBad = findings.some(f => f.includes('DEFECT') ? true : /- overlaps: (?!- none -)|- clipped: (?!- none -)|- contrast<4.5: (?!- none -)/.test(f));
 appendFileSync(REPORT, '\n## Step 4: Screenshots & visual defects\n\n20 full-page PNGs saved to `audit/screenshots/` (5 routes × 360/1280 × light/dark, fullPage, deviceScaleFactor 1).\n\nCOULD NOT RUN: pixel-level visual inspection by this worker - the active model in this session does not support image input (`read` on the PNGs returned "model does not support images"). Instead, each of the 20 rendered pages was inspected programmatically (same 4 conditions): text-on-text overlap (bounding-box intersection of visible text nodes, < 4.5:1 contrast, and text containers clipped by overflow-hidden). Findings:\n\n' + findings.join('\n') + (anyBad ? '' : '\n\nAll 20 screens: no overlapping text, no clipped content, no text below 4.5:1 contrast.') + '\n');
+appendFileSync(
+  REPORT,
+  '\n## Step 5: Style-axis contrast (signal / archive / console x light / dark)\n\n' +
+    'Archive and console ship behind the header style switcher but were never audited before launch. ' +
+    'Every text token needs >= 4.5:1 and every border token >= 3:1 against surface, surface-raised and surface-sunken.\n\n' +
+    tokenReport.join('\n') +
+    '\n' + (tokenFailures === 0 ? 'All six combinations pass.' : tokenFailures + ' failing pairs.') + '\n',
+);
+
 console.log(anyBad ? 'FINDINGS PRESENT - see REPORT.md step 4' : 'ALL 20 CLEAN');
+if (tokenFailures > 0) process.exitCode = 1;

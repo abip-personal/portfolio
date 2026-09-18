@@ -1,20 +1,18 @@
 ---
 /**
- * One page per published work entry, at /work/<id>/.
+ * One page per published off-the-clock entry, at /off-the-clock/<id>/.
  *
- * Category-scoped: getStaticPaths only sees 'work' entries, so prev/next
- * never crosses into off-the-clock. The agriluso deep-dive gets its
- * architecture diagram injected through an `h2` override on the MDX body —
- * see `components/diagrams/*H2.astro`. The content files are untouched.
+ * Category-scoped: getStaticPaths only sees 'off-the-clock' entries, so
+ * prev/next never crosses into work. No diagram map — the MDX bodies render
+ * as-is through EntryLayout.
  */
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import EntryLayout from '@/layouts/EntryLayout.astro';
-import AgrilusoH2 from '@/components/diagrams/AgrilusoH2.astro';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const entries = (await getCollection('entries', ({ data }) => !data.draft))
-    .filter((entry) => entry.data.category === 'work')
+    .filter((entry) => entry.data.category === 'off-the-clock')
     .sort((a, b) => a.data.order - b.data.order);
 
   return entries.map((entry, index) => ({
@@ -35,15 +33,8 @@ interface Props {
 
 const { entry, prev, next } = Astro.props;
 const { Content } = await render(entry);
-
-/** Diagram-bearing case studies, keyed by entry id. */
-const diagramHeadings: Record<string, typeof AgrilusoH2 | undefined> = {
-  agriluso: AgrilusoH2,
-};
-
-const h2 = diagramHeadings[entry.id];
 ---
 
 <EntryLayout entry={entry} prev={prev} next={next}>
-  <Content components={h2 ? { h2 } : {}} />
+  <Content />
 </EntryLayout>

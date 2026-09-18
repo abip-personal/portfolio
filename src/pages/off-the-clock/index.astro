@@ -1,0 +1,21 @@
+---
+/**
+ * /off-the-clock/ index — a thin route around <EntryIndex> for the
+ * 'off-the-clock' category: the category copy from categories.ts, EntryCard
+ * grids, and the closing CTA all live there.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import EntryIndex from '@/components/EntryIndex.astro';
+---
+
+<BaseLayout
+  title="Off the clock"
+  description="Things I build when the clock stops: a homelab from the hardware up, and the home automation that runs on top of it."
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <EntryIndex category="off-the-clock" />
+</BaseLayout>

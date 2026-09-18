@@ -3,15 +3,60 @@
  * Components and the Astro config both read from here — change it in one place.
  */
 
+/** First day on the job — the one number the career length is derived from. */
+export const CAREER_START = '2008-05';
+
+/**
+ * Full years since {@link CAREER_START}, recomputed on every build so the copy
+ * ages by itself instead of drifting a year behind reality.
+ */
+export function yearsShipping(now = new Date()): number {
+  const [startYear, startMonth] = CAREER_START.split('-').map(Number);
+  const months =
+    (now.getFullYear() - startYear) * 12 + (now.getMonth() + 1 - startMonth);
+  return Math.floor(months / 12);
+}
+
+const NUMBER_WORDS: Record<number, string> = {
+  10: 'Ten',
+  11: 'Eleven',
+  12: 'Twelve',
+  13: 'Thirteen',
+  14: 'Fourteen',
+  15: 'Fifteen',
+  16: 'Sixteen',
+  17: 'Seventeen',
+  18: 'Eighteen',
+  19: 'Nineteen',
+  20: 'Twenty',
+  21: 'Twenty-one',
+  22: 'Twenty-two',
+  23: 'Twenty-three',
+  24: 'Twenty-four',
+  25: 'Twenty-five',
+  26: 'Twenty-six',
+  27: 'Twenty-seven',
+  28: 'Twenty-eight',
+  29: 'Twenty-nine',
+  30: 'Thirty',
+};
+
+/** Capitalised word form for headline copy; falls back to the digits. */
+export function yearsShippingWord(now = new Date()): string {
+  const years = yearsShipping(now);
+  return NUMBER_WORDS[years] ?? String(years);
+}
+
+const YEARS = yearsShipping();
+
 export const SITE = {
   url: 'https://diogoferreira.dev',
   name: 'Diogo Ferreira',
   role: 'Principal Software Engineer',
   tagline: 'Full-Stack Systems · Cloud-Native Architecture',
-  location: 'Lisbon, Portugal',
+  location: 'Portugal',
   availability: 'Open to full-remote Principal / Staff roles',
-  description:
-    'Principal software engineer with 18 years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS.',
+  description: `Principal software engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS.`,
   cvPath: '/diogo-ferreira-cv.pdf',
   locale: 'en',
   themeColor: '#123A5E',
@@ -27,8 +72,8 @@ export const SOCIALS = [
  */
 export const NAV = [
   { label: 'Work', href: '/work/' },
+  { label: 'Off the clock', href: '/off-the-clock/' },
   { label: 'Experience', href: '/#experience' },
-  { label: 'Off the clock', href: '/#hobbies' },
   { label: 'Writing', href: '/blog/' },
   { label: 'Contact', href: '/#contact' },
 ] as const;
