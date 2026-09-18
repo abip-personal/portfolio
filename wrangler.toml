@@ -16,7 +16,12 @@ compatibility_date = "2025-09-01"
 [assets]
 directory = "./dist"
 # `404-page` — not `single-page-application`. This is a multi-page static build
-# with real URLs per route, and Astro emits `dist/404.html`; SPA handling would
-# rewrite every miss to `index.html` with a 200 and hide genuine 404s from
-# crawlers and from the link checker.
+# with real URLs per route: SPA handling would rewrite every miss to
+# `index.html` with a 200 and hide genuine 404s from crawlers and from the link
+# checker.
+#
+# `404-page` serves `dist/404.html` on a miss, and that file exists only because
+# `src/pages/404.astro` does — Astro emits no 404 unless the route is written.
+# If that page is ever deleted this setting silently degrades to Cloudflare's
+# own unstyled error page, so the two must be changed together.
 not_found_handling = "404-page"
