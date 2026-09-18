@@ -158,3 +158,14 @@ audit/styles/
 
 # Local dev / MCP config
 .mcp.json
+
+# Wrangler local secrets. `.env`/`.env.*` above do not cover this one, and it is
+# where CLOUDFLARE_API_TOKEN ends up if you ever run wrangler locally.
+.dev.vars
+.dev.vars.*
+
+# This repo is npm (package-lock.json, Node 24 pinned). A pnpm lockfile here is
+# always an accident — Orca's project setup hook still runs `pnpm install` and
+# drops these into fresh worktrees.
+pnpm-lock.yaml
+pnpm-workspace.yaml
