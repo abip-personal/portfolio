@@ -155,3 +155,6 @@ vite.config.ts.timestamp-*
 audit/screenshots/
 .lighthouseci/
 audit/styles/
+
+# Local dev / MCP config
+.mcp.json
