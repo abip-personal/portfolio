@@ -33,10 +33,27 @@
   #     edited. Revisit if Astro's experimental CSP support is enabled.
   #   style-src  — `build.inlineStylesheets: 'auto'` inlines small stylesheets,
   #     and Astro emits per-component <style> blocks.
-  # Everything else is locked down: no third-party origins, no framing, no
-  # plugins, no <base> hijacking. There is no user input and no server runtime,
-  # so the residual XSS surface is effectively nil.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
+  # One deliberate loosening beyond those two, and the only one touching
+  # script-src: the single third-party origin
+  # https://static.cloudflareinsights.com, which serves the Cloudflare Web
+  # Analytics beacon (beacon.min.js). We do NOT tag it into our own markup
+  # anywhere — Cloudflare injects the beacon at the edge, which is exactly why
+  # it reaches the browser even though no <script> for it lives in
+  # BaseLayout.astro. (Manually embedding the tag is the second documented
+  # approach; it is out of scope here, and doing so now would risk loading the
+  # beacon twice.) connect-src is deliberately NOT widened. Cloudflare
+  # documents two reporting paths: an edge-injected beacon posts to
+  # /cdn-cgi/rum on our own origin, which the 'self' here already covers, while
+  # only a manually-embedded one posts to cloudflareinsights.com. Which applies
+  # here is not settled — /cdn-cgi/rum currently 404s on this host — so adding a
+  # third-party origin now would loosen the policy for a path never observed.
+  # It stays out until a real connect-src violation is seen. To remove
+  # this origin again, turn Cloudflare Web Analytics off in the dashboard —
+  # that stops the edge from injecting the beacon at all. Everything else is
+  # still locked down: no other third-party origins, no framing, no plugins,
+  # no <base> hijacking. There is no user input and no server runtime, so the
+  # residual XSS surface is effectively nil.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests
 
 # Astro emits content-hashed filenames here, so they can be cached forever.
 /_astro/*
