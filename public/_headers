@@ -44,14 +44,28 @@
 
 # Build-time OG cards are stable per deploy but keep their own path, so give
 # them a long browser TTL with revalidation at the edge.
-# CORP is relaxed here so social/preview clients that render the card in a
-# browser context are not blocked by the site-wide `same-origin` policy.
+#
+# Worker Static Assets _headers rules ACCUMULATE rather than override:
+#   "An incoming request which matches multiple rules URL patterns will
+#    inherit all rules headers" — Cloudflare docs.
+#
+# The `/*` block above sets Cross-Origin-Resource-Policy: same-origin.  A bare
+# re-declaration of `cross-origin` here does NOT replace it; both values are
+# joined and sent, so a preview client reading the first header sees
+# same-origin and refuses the card.  This exact dual-header bug was confirmed
+# live on portfolio.abip.pt (POR-41).
+#
+# The `!` prefix unsets the inherited header first, leaving exactly one
+# Cross-Origin-Resource-Policy: cross-origin on the response — the relaxation
+# social and preview clients need.
 /og/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  ! Cross-Origin-Resource-Policy
   Cross-Origin-Resource-Policy: cross-origin
 
 /og-default.png
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  ! Cross-Origin-Resource-Policy
   Cross-Origin-Resource-Policy: cross-origin
 
 # HTML and feeds must revalidate so a new deploy is picked up immediately.
