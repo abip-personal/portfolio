@@ -14,9 +14,9 @@ without ever booting an isolate.
 > open to adding a real Worker entrypoint later without migrating hosts.
 
 > **One-time dashboard setup** (creating the Worker, connecting the repo,
-> attaching the domain) is written up separately in
-> [`docs/CLOUDFLARE-SETUP.md`](docs/CLOUDFLARE-SETUP.md). This file covers the
-> repo-side config and the day-to-day deploy commands.
+> attaching the domain) is a manual, account-specific step and is not tracked
+> in this repo. This file covers the repo-side config and the day-to-day
+> deploy commands.
 
 | Setting | Value |
 | --- | --- |
