@@ -28,7 +28,7 @@ metrics:
     detail: "End-to-end time for a buyer to complete a multi-seller order after the rebuild."
   - value: "8"
     label: "payment methods"
-    detail: "Enabled through the Stripe integration, alongside BNPL and shipping/logistics providers."
+    detail: "Enabled through the Stripe integration, including cards, Apple Pay, Google Pay, PayPal, Amazon Pay and BNPL."
 featured: true
 order: 1
 confidential: true
@@ -37,7 +37,7 @@ draft: false
 
 ## Context
 
-Creoate is a B2B wholesale marketplace: retailers buy from many independent brands in one basket. I joined as the hands-on technical owner for architecture and delivery, working inside a team of four to six engineers.
+Creoate is a B2B wholesale marketplace: retailers buy from many independent brands in one basket. I lead a team of four to six engineers and own architecture and delivery.
 
 The checkout was the part of the platform where every other problem showed up at once. A single buyer basket fans out into one order per seller, each with its own shipping rules, its own minimum order value, and its own fulfilment timeline — but the buyer pays once. The existing flow did all of that work synchronously, in-request, and a checkout took around ten seconds. That is long enough that buyers assume it has failed, refresh, and create the exact duplicate-order problem you least want in a payments path.
 
@@ -61,7 +61,7 @@ The core move was to stop treating checkout as one long synchronous transaction 
 The request path now does the minimum that must be correct-on-write: validate the basket, resolve per-seller shipping and totals, create the order aggregate, and take payment authorisation. Everything that does not have to block the buyer — seller notification, catalogue and inventory reconciliation, logistics booking, analytics — moved behind events onto queues, with retries and dead-letter handling.
 
 
-The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 25k products synced daily, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
+The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 1.5M product operations a month, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
 
 Infrastructure is Terraform end to end — Lambda where the work is spiky and short, containers where it is long-running — so the whole thing is reproducible and reviewable in the same pipeline as the application code.
 
@@ -83,9 +83,10 @@ Infrastructure is Terraform end to end — Lambda where the work is spiky and sh
 ## Results
 
 - Checkout latency went from roughly 10 seconds to under 2.5 seconds.
-- The Stripe integration enabled 8 payment methods, with BNPL and shipping/logistics integrations built on the same foundations.
-- The Shopify catalogue sync reached roughly a 96% sync success rate, with about 99% of new seller catalogues created automatically and around 25k products synced daily.
+- The Stripe integration enabled 8 payment methods, including cards, Apple Pay, Google Pay, PayPal, Amazon Pay and BNPL, with the shipping/logistics integrations built on the same foundations.
+- The Shopify catalogue sync reached roughly a 96% sync success rate, with about 99% of new seller catalogues created automatically across roughly 1.5M product operations a month.
 - Observability moved from "check the logs" to Grafana dashboards and PostHog product analytics, so latency and failure regressions surfaced before support tickets did.
+- PostHog tracks the checkout funnel and payment-method usage, so drop-off and method mix are measured rather than guessed.
 
 {/* TODO(diogo): any conversion or abandonment movement you are allowed to state publicly? If not, leave this out entirely — I have not asserted one. */}
 

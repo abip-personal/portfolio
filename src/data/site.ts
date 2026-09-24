@@ -52,18 +52,21 @@ const YEARS = yearsShipping();
 export const SITE = {
   url: 'https://portfolio.abip.pt',
   name: 'Diogo Ferreira',
-  role: 'Principal Software Engineer',
-  tagline: 'Full-Stack Systems · Cloud-Native Architecture',
+  role: 'Software Technical Lead',
+  tagline: 'TypeScript · Node.js · AWS',
   location: 'Portugal',
-  availability: 'Open to full-remote Principal / Staff roles',
-  description: `Principal software engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS.`,
-  cvPath: '/diogo-ferreira-cv.pdf',
+  availability: 'Open to full-remote Tech Lead / Staff roles',
+  description: `Software technical lead with ${YEARS} years building production systems on TypeScript, Node.js, React and AWS — marketplace checkout and payments, AI-assisted engineering, and four engineering teams built from scratch.`,
+  // Points at the "coming soon" page until the PDF lands in public/; then set
+  // it back to '/diogo-ferreira-cv.pdf'.
+  cvPath: '/coming-soon/',
   locale: 'en',
   themeColor: '#123A5E',
 } as const;
 
 export const SOCIALS = [
   { label: 'LinkedIn', href: 'https://linkedin.com/in/ferreiradfr' },
+  { label: 'GitHub', href: 'https://github.com/abipster' },
 ] as const;
 
 /**

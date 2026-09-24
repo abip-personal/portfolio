@@ -11,7 +11,7 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => !page.includes('/styleguide'),
+      filter: (page) => !page.includes('/styleguide') && !page.includes('/coming-soon'),
     }),
   ],
   vite: {
