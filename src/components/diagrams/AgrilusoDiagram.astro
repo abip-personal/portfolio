@@ -88,7 +88,7 @@ const wide = [
     sub: ['weather + phytosanitary', 'scheduled · Docker container'],
   }),
 
-  /* Stores and the NLP layer ---------------------------------------- */
+  /* Stores and the LLM layer ---------------------------------------- */
   edge('M 120 214 V 248', { ns: W }),
   edge('M 350 214 V 248', { ns: W, both: true }),
   edge('M 450 181 H 462 V 281 H 474', { ns: W, both: true }),
@@ -117,7 +117,7 @@ const wide = [
     w: 220,
     h: 58,
     tone: 'signal',
-    title: 'NLP smart actions',
+    title: 'LLM smart actions',
     sub: ['intent extracted from', 'what people already type'],
     size: 12,
   }),
@@ -211,7 +211,7 @@ const narrow = [
     w: 130,
     h: 48,
     tone: 'signal',
-    title: ['NLP smart', 'actions'],
+    title: ['LLM smart', 'actions'],
     size: 12,
   }),
 
@@ -248,7 +248,7 @@ const alternative = [
   'A React Native and Expo app, used by farmers and agronomists in the field, holds a local write queue: writes made offline are queued on the device and reconciled when connectivity returns.',
   'The app talks to two services directly: over HTTPS to the REST API, and over a bidirectional websocket to the real-time chat service.',
   'The REST API (NestJS and TypeORM, in a Docker container) owns the domain — users, parcels, crops, treatments and the logbook — and stores it in PostgreSQL with PostGIS, where parcel geometry is spatially indexed.',
-  'The real-time chat service (Socket.io, in a Docker container) uses Redis for pub/sub across instances and for session state, and passes the message stream through an NLP layer that extracts actionable intent — a treatment, a product, a date — as a smart action.',
+  'The real-time chat service (Socket.io, in a Docker container) uses Redis for pub/sub across instances and for session state, and passes the message stream through an LLM-powered layer that extracts actionable intent — a treatment, a product, a date — as a smart action.',
   'A smart action confirmed in chat is written back through the REST API as a structured treatment record, which is what the legally required digital field logbook is generated from.',
   'A third service ingests weather and phytosanitary feeds on a schedule and normalises them into the same geographic model in PostgreSQL and PostGIS.',
   'All three services run as Docker containers, with AWS as the deployment target.',
