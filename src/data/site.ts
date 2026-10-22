@@ -52,11 +52,11 @@ const YEARS = yearsShipping();
 export const SITE = {
   url: 'https://portfolio.abip.pt',
   name: 'Diogo Ferreira',
-  role: 'Principal Software Engineer',
+  role: 'Staff Product Engineer',
   tagline: 'Full-Stack Systems · Cloud-Native Architecture',
   location: 'Portugal',
   availability: 'Open to full-remote Principal / Staff roles',
-  description: `Principal software engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS.`,
+  description: `Staff product engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS.`,
   cvPath: '/diogo-ferreira-cv.pdf',
   locale: 'en',
   themeColor: '#123A5E',
