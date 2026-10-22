@@ -1,7 +1,7 @@
 ---
 /**
- * Career timeline, newest first. Roles marked `expanded` carry their
- * highlights; everything older collapses to a single scannable line.
+ * Career timeline, newest first. Each role is a native <details> toggle;
+ * roles marked `expanded` start open, the rest start collapsed.
  */
 import { getCollection } from 'astro:content';
 import Container from '@/components/ui/Container.astro';
@@ -32,25 +32,34 @@ const roles = (await getCollection('experience')).sort((a, b) =>
               class="signal-rule absolute top-2 -left-[calc(1.5rem+1px)] h-[4px] w-4 -translate-x-1/2 sm:-left-[calc(2rem+1px)]"
             />
 
-            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-              <h3
-                class:list={[
-                  'font-bold text-balance text-ink',
-                  role.data.expanded ? 'text-2xl' : 'text-lg',
-                ]}
-              >
-                {role.data.title}
-                <span class="text-accent"> · {role.data.org}</span>
-              </h3>
-              <p class="shrink-0 text-sm font-semibold tracking-wide text-ink-subtle sm:text-right">
-                {role.data.period}
-              </p>
-            </div>
+            <details class="group" open={role.data.expanded}>
+              <summary class="-m-2 cursor-pointer list-none rounded-md p-2 marker:hidden [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                  <h3
+                    class:list={[
+                      'flex items-baseline gap-2 font-bold text-balance text-ink',
+                      role.data.expanded ? 'text-2xl' : 'text-lg',
+                    ]}
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="inline-block shrink-0 text-base text-accent transition-transform group-open:rotate-90"
+                    >
+                      ▸
+                    </span>
+                    <span>
+                      {role.data.title}
+                      <span class="text-accent"> · {role.data.org}</span>
+                    </span>
+                  </h3>
+                  <p class="shrink-0 text-sm font-semibold tracking-wide text-ink-subtle sm:text-right">
+                    {role.data.period}
+                  </p>
+                </div>
+                <p class="mt-1 pl-6 text-sm text-ink-subtle">{role.data.location}</p>
+              </summary>
 
-            <p class="mt-1 text-sm text-ink-subtle">{role.data.location}</p>
-
-            {role.data.expanded && (
-              <>
+              <div class="pl-6">
                 {role.data.summary && (
                   <p class="mt-4 max-w-2xl text-pretty text-ink-muted">{role.data.summary}</p>
                 )}
@@ -76,8 +85,8 @@ const roles = (await getCollection('experience')).sort((a, b) =>
                     ))}
                   </ul>
                 )}
-              </>
-            )}
+              </div>
+            </details>
           </li>
         ))
       }

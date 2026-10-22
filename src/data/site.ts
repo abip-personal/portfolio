@@ -52,11 +52,11 @@ const YEARS = yearsShipping();
 export const SITE = {
   url: 'https://portfolio.abip.pt',
   name: 'Diogo Ferreira',
-  role: 'Software Technical Lead',
-  tagline: 'TypeScript · Node.js · AWS',
+  role: 'Staff Product Engineer',
+  tagline: 'Full-Stack Systems · Cloud-Native Architecture · AI-Assisted Engineering',
   location: 'Portugal',
   availability: 'Open to full-remote Tech Lead / Staff roles',
-  description: `Software technical lead with ${YEARS} years building production systems on TypeScript, Node.js, React and AWS — marketplace checkout and payments, AI-assisted engineering, and four engineering teams built from scratch.`,
+  description: `Staff product engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS, with hands-on TypeScript, Python and AI-assisted engineering.`,
   // Points at the "coming soon" page until the PDF lands in public/; then set
   // it back to '/diogo-ferreira-cv.pdf'.
   cvPath: '/coming-soon/',

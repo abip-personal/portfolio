@@ -1,18 +1,21 @@
 ---
-title: "Software Technical Lead"
+title: "Tech Lead / Staff Product Engineer"
 org: "Creoate"
 period: "January 2022 – Present"
 location: "Portugal (Remote)"
 startDate: "2022-01"
-summary: "B2B marketplace (~30 people). I lead a team of 4–6 engineers within a 12-person engineering department, owning architecture and delivery."
+summary: "Hands-on tech lead on Creoate's B2B marketplace (~30 people), leading a team of 4–6 engineers within a 12-engineer department and owning architecture and delivery, with several deploys a day."
 highlights:
-  - "Rebuilt checkout and core marketplace infrastructure, cutting latency from ~10s to under 2.5s"
-  - "Co-led AI-assisted engineering adoption across all 12 engineers (Claude, Devin, Atlassian Rovo, BMAD method): throughput from ~3.5 to ~6.8 story points per sprint day, change failure rate from ~60% to under 15%, cycle time from ~5 to ~1.5 days"
-  - "Built the Stripe integration with 8 payment methods, including cards, Apple Pay, Google Pay, PayPal, Amazon Pay and BNPL (Billie, Afterpay/Clearpay)"
-  - "Built shipping and Shopify integrations; catalogue sync runs ~1.5M product operations a month at ~96% success, creating ~99% of new catalogues automatically"
-  - "Own AWS infrastructure with Terraform, Docker, Lambda and SQS/SNS, shipping several deploys a day via GitLab/GitHub CI/CD"
-  - "Set up observability (Grafana) and product analytics (PostHog), including checkout funnel and payment method tracking; handle production incident response"
-  - "Built the team from scratch and handled backfills (3 hires); mentor engineers and own the roadmap and OKRs with product and business stakeholders"
+  - "Hired as tech lead for both the backend and frontend teams, hardening a React and JavaScript codebase that lacked error handling and observability"
+  - "Rolled out structured logging and monitoring (Grafana, PostHog, including checkout funnel and payment method tracking) service by service, plus security fixes, Terraform-managed AWS with CI/CD and production incident response"
+  - "Started the JavaScript to TypeScript migration of almost the entire codebase as a personal initiative, highest-risk services first, with OpenAPI specs generated from code"
+  - "Architect and lead developer on the rebuild of checkout and core marketplace infrastructure (Next.js, AWS API Gateway and Lambda), cutting checkout latency from ~10s to under 2.5s"
+  - "Integrated Stripe with 8 payment methods including cards, Apple Pay, Google Pay, PayPal, Amazon Pay and BNPL (Billie, Afterpay/Clearpay) as part of the checkout rebuild, and designed the internal API for the TWO.inc BNPL integration"
+  - "Built a multi-carrier shipping integration from the ground up, covering API gateways, request schema validation, API security and integration tests"
+  - "Led the multi-tenant Shopify catalogue sync, event-driven on SQS/SNS across many independent sellers — ~99% of new catalogues created automatically over ~1.5M product operations a month at ~96% success"
+  - "Co-led AI-assisted development adoption across all 12 engineers, defining tool-agnostic processes (BMAD method, ticket lifecycle checkpoints) on Claude, Devin and Atlassian Rovo — throughput from ~3.5 to ~6.8 story points per sprint day and median cycle time from ~5 days to ~1.5 days (about 3x faster)"
+  - "TypeScript and OpenAPI became the team default and one of the bigger contributors to cutting change failure rate (DORA) from ~60% to under 15%"
+  - "Built the team from scratch and handled backfills (3 hires); mentor engineers and own the technical roadmap and OKRs with product and business stakeholders"
 stack:
   - "AWS"
   - "Node.js"
@@ -24,6 +27,9 @@ stack:
   - "GitHub Actions"
   - "Grafana"
   - "PostHog"
+  - "Python"
+  - "OpenAPI"
+  - "AI-assisted development"
 expanded: true
 ---
 
