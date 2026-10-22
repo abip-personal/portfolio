@@ -1,7 +1,7 @@
 ---
 title: "Rebuilding checkout on a B2B marketplace"
 blurb: "A full rebuild of the checkout flow and the marketplace infrastructure under it, taking checkout from ~10s to under 2.5s."
-role: "Software Technical Lead"
+role: "Tech Lead / Staff Product Engineer"
 org: "Creoate"
 category: "work"
 period: "2022 – present"
@@ -61,7 +61,7 @@ The core move was to stop treating checkout as one long synchronous transaction 
 The request path now does the minimum that must be correct-on-write: validate the basket, resolve per-seller shipping and totals, create the order aggregate, and take payment authorisation. Everything that does not have to block the buyer — seller notification, catalogue and inventory reconciliation, logistics booking, analytics — moved behind events onto queues, with retries and dead-letter handling.
 
 
-The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 25k products synced daily, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
+The same event backbone carries the Shopify integration, which syncs seller catalogues automatically rather than asking sellers to re-enter their products. That runs at roughly 1.5M product operations a month, at about a 96% sync success rate, with around 99% of new seller catalogues created automatically.
 
 Infrastructure is Terraform end to end — Lambda where the work is spiky and short, containers where it is long-running — so the whole thing is reproducible and reviewable in the same pipeline as the application code.
 
@@ -84,7 +84,7 @@ Infrastructure is Terraform end to end — Lambda where the work is spiky and sh
 
 - Checkout latency went from roughly 10 seconds to under 2.5 seconds.
 - The Stripe integration enabled 8 payment methods, with BNPL and shipping/logistics integrations built on the same foundations.
-- The Shopify catalogue sync reached roughly a 96% sync success rate, with about 99% of new seller catalogues created automatically and around 25k products synced daily.
+- The Shopify catalogue sync reached roughly a 96% sync success rate, with about 99% of new seller catalogues created automatically and around 1.5M product operations a month.
 - Observability moved from "check the logs" to Grafana dashboards and PostHog product analytics, so latency and failure regressions surfaced before support tickets did.
 
 {/* TODO(diogo): any conversion or abandonment movement you are allowed to state publicly? If not, leave this out entirely — I have not asserted one. */}
