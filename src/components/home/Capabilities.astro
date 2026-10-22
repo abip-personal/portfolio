@@ -12,13 +12,15 @@ import SectionHeading from '@/components/ui/SectionHeading.astro';
 const groups: Array<{ title: string; summary: string; items: string[] }> = [
   {
     title: 'Languages, frameworks & data',
-    summary: 'Full-stack TypeScript and Java, with relational and NoSQL stores behind it.',
+    summary: 'Full-stack TypeScript, with Java and Python alongside and relational and NoSQL stores behind it.',
     items: [
       'TypeScript',
       'Node.js',
+      'NestJS',
       'React',
       'React Native',
       'Java',
+      'Python',
       'PostgreSQL',
       'MySQL',
       'MongoDB',
@@ -27,43 +29,84 @@ const groups: Array<{ title: string; summary: string; items: string[] }> = [
     ],
   },
   {
-    title: 'Cloud & DevOps',
-    summary: 'AWS infrastructure owned as code, and a pipeline that ships several times a day.',
+    title: 'AWS',
+    summary: 'Compute, messaging, data and security services run in production, with the infrastructure owned as code.',
     items: [
-      'AWS',
+      'EC2',
+      'ECS / Fargate',
+      'ECR',
       'Lambda',
-      'Terraform',
-      'Docker',
-      'GitLab CI',
-      'GitHub Actions',
+      'API Gateway',
+      'CloudFront',
+      'S3',
+      'RDS / Aurora',
       'SQS / SNS',
+      'EventBridge',
+      'Step Functions',
+      'Athena',
+      'Glue',
+      'Secrets Manager',
+      'IAM',
+      'Cognito',
+      'CloudWatch',
     ],
   },
   {
-    title: 'Engineering practices',
-    summary: 'API design, automated testing, observability, and AI-assisted engineering.',
+    title: 'AI & AI-assisted engineering',
+    summary: 'LLMs integrated into products, and AI tooling adopted across a whole engineering team.',
     items: [
+      'LLM integration',
+      'Claude',
+      'OpenAI',
+      'Gemini',
+      'Ollama (self-hosted models)',
+      'GitHub Copilot',
+      'Devin',
+      'Atlassian Rovo',
+      'Orca',
+    ],
+  },
+  {
+    title: 'DevOps & architecture',
+    summary: 'A pipeline that ships several times a day, and systems designed to fail in understood ways.',
+    items: [
+      'Terraform',
+      'Docker',
+      'Kubernetes (basic)',
+      'GitLab CI',
+      'GitHub Actions',
+      'System design',
+      'Distributed systems',
+      'Microservices',
+      'Event-driven architecture',
       'REST',
       'GraphQL',
+      'OpenAPI',
+    ],
+  },
+  {
+    title: 'Quality & operations',
+    summary: 'Automated testing, observability and incident response, so production behaviour is known rather than guessed.',
+    items: [
       'Jest',
       'Cypress',
       'Grafana',
       'Prometheus',
       'Datadog',
       'PostHog',
-      'Claude',
-      'Ollama',
+      'Incident response',
     ],
   },
   {
     title: 'Technical leadership',
     summary: 'The half of the job that is not code — and the half that compounds.',
     items: [
-      'System design',
-      'Architecture ownership',
-      'Engineering mentorship',
-      'Technical interviewing',
-      'Cross-team collaboration',
+      'Hiring',
+      'Mentoring',
+      'Performance reviews',
+      'OKRs',
+      'Stakeholder management',
+      'Agile / Scrum',
     ],
   },
 ];
@@ -75,7 +118,7 @@ const groups: Array<{ title: string; summary: string; items: string[] }> = [
       id="capabilities"
       eyebrow="Capabilities"
       title="What I bring to the table"
-      description="Deep full-stack range, with the cloud and delivery practice underneath it — and the leadership habits that make the rest of a team faster."
+      description="Deep full-stack range, with AWS, AI tooling and delivery practice underneath it — and the leadership habits that make the rest of a team faster."
     />
 
     <div class="mt-10 grid gap-5 sm:grid-cols-2">
