@@ -55,15 +55,18 @@ export const SITE = {
   role: 'Staff Product Engineer',
   tagline: 'Full-Stack Systems · Cloud-Native Architecture · AI-Assisted Engineering',
   location: 'Portugal',
-  availability: 'Open to full-remote Principal / Staff roles',
+  availability: 'Open to full-remote Tech Lead / Staff roles',
   description: `Staff product engineer with ${YEARS} years building production systems end to end — payment infrastructure, regulated platforms, and cloud-native architecture on AWS, with hands-on TypeScript, Python and AI-assisted engineering.`,
-  cvPath: '/diogo-ferreira-cv.pdf',
+  // Points at the "coming soon" page until the PDF lands in public/; then set
+  // it back to '/diogo-ferreira-cv.pdf'.
+  cvPath: '/coming-soon/',
   locale: 'en',
   themeColor: '#123A5E',
 } as const;
 
 export const SOCIALS = [
   { label: 'LinkedIn', href: 'https://linkedin.com/in/ferreiradfr' },
+  { label: 'GitHub', href: 'https://github.com/abipster' },
 ] as const;
 
 /**

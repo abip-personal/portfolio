@@ -16,6 +16,7 @@ stack:
   - "Expo"
   - "Docker"
   - "AWS (target)"
+  - "Ollama"
 tags:
   - "Agtech"
   - "Real-time"
@@ -24,7 +25,7 @@ tags:
 metrics:
   - value: "3"
     label: "services"
-    detail: "REST API, real-time chat service with NLP-based smart actions, and a weather/phytosanitary data ingestion service — plus an offline-first mobile app."
+    detail: "REST API, real-time chat service with LLM-powered smart actions, and a weather/phytosanitary data ingestion service — plus an offline-first mobile app."
 featured: true
 order: 2
 confidential: false
@@ -37,7 +38,7 @@ Agriluso ([agriluso.pt](https://agriluso.pt)) connects Portuguese farmers with a
 
 The "recorded properly" part is the interesting half. Portuguese farmers are legally required to keep a field logbook of treatments applied. It is paperwork nobody wants to do and everybody has to, and it is generated as a by-product of exactly the conversations the platform already hosts.
 
-I am the lead developer on it — I architected the platform and drive most of the build — with a small team working alongside me. It is in active development and pre-launch.
+I founded it and I am the lead developer — I architected the platform and drive most of the build — with a small team working alongside me. It is in active development and pre-launch.
 
 ## Constraints
 
@@ -54,18 +55,17 @@ Three services, chosen because they have genuinely different runtime shapes, not
 
 The **REST API** (NestJS, TypeORM, PostgreSQL with PostGIS) owns the domain: users, parcels, crops, treatments, the logbook. PostGIS rather than application-level geo maths, because parcel geometry, containment and proximity queries belong in the database where they can be indexed.
 
-The **real-time chat service** (Socket.io, Redis) handles the conversation between farmer and agronomist. Redis carries pub/sub across instances and session state. On top of the message stream sits an NLP layer that recognises actionable intent in what people are already typing — a mentioned treatment, a product, a date — and surfaces it as a smart action rather than asking the user to fill in a form.
+The **real-time chat service** (Socket.io, Redis) handles the conversation between farmer and agronomist. Redis carries pub/sub across instances and session state. On top of the message stream sits an LLM-powered layer that recognises actionable intent in what people are already typing — a mentioned treatment, a product, a date — and surfaces it as a smart action rather than asking the user to fill in a form. Today I use Ollama to run models locally during development; the plan is to serve the smart actions from a self-hosted model on Ollama too, but that is not in place yet.
 
 The **ingestion service** pulls weather and phytosanitary data on a schedule and normalises it into the same geographic model, so advice can be contextualised by what is actually happening in that area.
 
 The **mobile app** is React Native and Expo, built offline-resilient: local writes queue and reconcile when connectivity returns.
 
-{/* DIAGRAM: React Native/Expo app at the top with a local queue box attached, drawn with a dashed "offline" arrow. Below it, three service boxes side by side: REST API (NestJS) → PostgreSQL/PostGIS; chat service (Socket.io) → Redis, with a bidirectional websocket arrow up to the app and a side arrow to an NLP smart-actions box; ingestion service pulling from two external sources (weather feed, phytosanitary feed) on a schedule and writing into PostgreSQL/PostGIS. An arrow from the chat service into the REST API showing that a confirmed smart action writes a logbook entry. All three services shown as Docker containers, with AWS marked as the deployment target. */}
+{/* DIAGRAM: React Native/Expo app at the top with a local queue box attached, drawn with a dashed "offline" arrow. Below it, three service boxes side by side: REST API (NestJS) → PostgreSQL/PostGIS; chat service (Socket.io) → Redis, with a bidirectional websocket arrow up to the app and a side arrow to an LLM smart-actions box; ingestion service pulling from two external sources (weather feed, phytosanitary feed) on a schedule and writing into PostgreSQL/PostGIS. An arrow from the chat service into the REST API showing that a confirmed smart action writes a logbook entry. All three services shown as Docker containers, with AWS marked as the deployment target. */}
 
 The logbook is the join between the two halves: a smart action confirmed in chat becomes a structured treatment record in the API, which is what the legally required digital logbook is generated from.
 
 {/* TODO(diogo): how does offline reconciliation resolve conflicts — last-write-wins, per-field merge, or does the domain make conflicts impossible? */}
-{/* TODO(diogo): is the NLP layer a hosted model, a local one, or rule/classifier-based? I have deliberately not said, since the CV only says "NLP-based". */}
 
 ## Key decisions
 
@@ -85,7 +85,7 @@ The platform is pre-launch, so the honest result statement is about what exists 
 
 - Three services running under Docker with AWS as the deployment target.
 - A REST API over PostgreSQL/PostGIS covering the full domain model, with GDPR-by-design consent, export and erasure.
-- A real-time chat service with NLP-driven smart actions feeding structured records.
+- A real-time chat service with LLM-powered smart actions feeding structured records.
 - A React Native/Expo mobile app that functions without connectivity.
 - Automatic generation of the legally required digital field logbook as a by-product of normal use.
 

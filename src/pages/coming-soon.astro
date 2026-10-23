@@ -1,0 +1,59 @@
+---
+/**
+ * Placeholder for resources that are linked but not published yet — today,
+ * the CV PDF. `SITE.cvPath` points here until the PDF lands in `public/`, so
+ * every "Download CV" link reaches a real page instead of the 404.
+ *
+ * noindex — a placeholder is not site content. Same full site shell as the
+ * 404 page, so the visitor always has a way back.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import Container from '@/components/ui/Container.astro';
+import Button from '@/components/ui/Button.astro';
+import SignalRule from '@/components/ui/SignalRule.astro';
+import { SOCIALS } from '@/data/site';
+
+const linkedin = SOCIALS.find((social) => social.label === 'LinkedIn');
+---
+
+<BaseLayout
+  title="Coming soon"
+  description="This resource is not published yet. It will be here shortly."
+  noindex
+>
+  <SiteHeader slot="header" />
+  <SiteFooter slot="footer" />
+
+  <Container size="content" class="py-20 sm:py-28">
+    <p class="flex items-center gap-3 text-2xs font-bold tracking-[0.18em] text-ink-muted uppercase">
+      <SignalRule length="1.75rem" thickness="3px" />
+      Coming soon
+    </p>
+
+    <h1 class="mt-5 text-4xl font-extrabold text-balance text-ink sm:text-5xl">
+      Not published yet
+    </h1>
+
+    <div class="mt-6 max-w-2xl">
+      <SignalRule length="7rem" thickness="6px" />
+      <p class="mt-6 text-lg text-pretty text-ink-muted">
+        The downloadable CV is on its way and will be here shortly. In the meantime, the experience
+        timeline and the case studies cover the same ground in more depth — or ask me for a copy on
+        LinkedIn.
+      </p>
+    </div>
+
+    <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+      <Button href="/#experience" size="lg">See the experience</Button>
+      {
+        linkedin && (
+          <Button href={linkedin.href} variant="secondary" size="lg" external>
+            Ask on LinkedIn
+          </Button>
+        )
+      }
+    </div>
+  </Container>
+</BaseLayout>

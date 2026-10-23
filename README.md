@@ -5,8 +5,8 @@ site that doubles as the artefact for one of the case studies it hosts.
 
 ## Why this repo is public
 
-One of the entries on the site is about taking AI-assisted engineering to 100%
-of an engineering org. Writing that up and then shipping the write-up through a
+One of the entries on the site is about co-leading AI-assisted engineering
+across a 12-engineer department. Writing that up and then shipping the write-up through a
 conventional hand-typed workflow would have been a bit of a contradiction, so
 this site was built the way the case study describes: an agent doing the
 typing, a human holding the gates.

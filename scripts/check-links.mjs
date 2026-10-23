@@ -27,9 +27,7 @@ const DIST = path.resolve(process.argv[2] ?? 'dist');
  */
 const SKIP_PAGES = new Set([]);
 
-const KNOWN_PENDING = new Set([
-  '/diogo-ferreira-cv.pdf', // public/ CV asset not committed yet (SITE.cvPath)
-]);
+const KNOWN_PENDING = new Set([]);
 
 /** @param {string} dir @returns {Promise<string[]>} */
 async function walk(dir) {
